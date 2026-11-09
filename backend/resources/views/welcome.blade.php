@@ -27,19 +27,19 @@
         </div>
     </div>
     <main class="auth-card" data-aos="fade-up">
-        <section class="auth-art" aria-label="SafeRuas membantu menjaga perjalanan tetap aman">
+        <section class="auth-art" aria-label="LaporDermayu membantu menjaga perjalanan tetap aman">
             <div class="auth-art-copy">
                 <span class="auth-art-kicker">Lapor Dermayu, AMAN BERKENDARA</span>
                 <h1>Perjalanan aman<br>dimulai dari sini.</h1>
-                <p>Pantau dan tindak lanjuti laporan infrastruktur jalan bersama SafeRuas.</p>
+                <p>Pantau dan tindak lanjuti laporan infrastruktur jalan bersama LaporDermayu.</p>
             </div>
-            <div class="auth-animation" id="safeRuasAnimation" role="img" aria-label="Animasi bersepeda"></div>
+            <div class="auth-animation" id="lapordermayuAnimation" role="img" aria-label="Animasi bersepeda"></div>
             <span class="auth-orb auth-orb-one" aria-hidden="true"></span>
             <span class="auth-orb auth-orb-two" aria-hidden="true"></span>
         </section>
 
         <section class="auth-panel" aria-labelledby="loginHeading">
-            <a href="{{ route('home') }}" class="auth-brand" aria-label="SafeRuas, beranda">
+            <a href="{{ route('home') }}" class="auth-brand" aria-label="LaporDermayu, beranda">
                 <img src="{{ asset('picture/logo.png') }}" alt="Logo LaporDermayu">
                 <span>LaporDermayu</span>
             </a>
