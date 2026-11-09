@@ -1,12 +1,8 @@
 import 'package:get/get.dart';
 import 'package:lapordermayu/modules/onboarding/controllers/onboarding_controller.dart';
 import 'package:lapordermayu/modules/onboarding/views/onboarding_view.dart';
-import 'package:lapordermayu/modules/auth/controllers/login_controller.dart';
-import 'package:lapordermayu/modules/auth/views/login_view.dart';
-import 'package:lapordermayu/modules/auth/controllers/register_controller.dart';
-import 'package:lapordermayu/modules/auth/views/register_view.dart';
-import '../modules/splash/controllers/splash_controller.dart';
-import '../modules/splash/views/splash_view.dart';
+import 'package:lapordermayu/modules/splash/controllers/splash_controller.dart';
+import 'package:lapordermayu/modules/splash/views/splash_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -25,20 +21,6 @@ class AppPages {
       page: () => const OnboardingView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<OnboardingController>(() => OnboardingController());
-      }),
-    ),
-    GetPage(
-      name: AppRoutes.login,
-      page: () => LoginView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<LoginController>(() => LoginController());
-      }),
-    ),
-    GetPage(
-      name: AppRoutes.register,
-      page: () => const RegisterView(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<RegisterController>(() => RegisterController());
       }),
     ),
   ];

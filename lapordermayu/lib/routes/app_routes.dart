@@ -5,4 +5,12 @@ abstract class AppRoutes {
   static const onboarding = '/onboarding';
   static const login = '/login';
   static const register = '/register';
+  static const main = '/main';
+  static const home = '/home';
+  static const maps = '/maps';
+  static const profile = '/profile';
+  
+  // Rute untuk fitur Report / Kamera
+  static const reportCamera = '/report-camera';
+  static const reportForm = '/report-form';
 }
