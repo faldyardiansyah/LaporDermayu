@@ -7,6 +7,7 @@ use App\Http\Controllers\superadmin\DashboardController as SuperAdminDashboardCo
 use App\Http\Controllers\superadmin\LaporanController as SuperAdminLaporanController;
 use App\Http\Controllers\superadmin\MasyarakatController;
 use App\Http\Controllers\superadmin\PetaLaporanController;
+use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -17,6 +18,13 @@ Route::controller(LoginController::class)->group(function () {
     Route::post('/login', 'store')->middleware('throttle:5,1');
     Route::post('/logout', 'destroy')->middleware('auth')->name('logout');
 });
+Route::middleware('auth')
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
+    });
 
 Route::middleware(['auth', 'super.admin'])
     ->prefix('superadmin')
