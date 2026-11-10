@@ -106,6 +106,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js" defer></script>
     <script>
         window.addEventListener('load', () => {
+            const splash = document.getElementById('app-splash');
+
+            if (splash) {
+                window.setTimeout(() => {
+                    splash.classList.add('splash-hidden');
+                    document.documentElement.classList.remove('show-splash');
+                }, 700);
+            }
+
             if (window.lottie) {
                 window.lottie.loadAnimation({
                     container: document.getElementById('lapordermayuAnimation'),
