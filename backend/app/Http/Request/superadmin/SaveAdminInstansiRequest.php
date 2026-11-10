@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\superadmin;
+namespace App\Http\Request\superadmin;
 
 use App\Models\Instansi;
 use App\Models\User;
@@ -70,7 +70,7 @@ class SaveAdminInstansiRequest extends FormRequest
 
         if ($this->isMethod('POST')) {
             $instansiId = Instansi::query()
-                ->where('nama_instansi', 'like', '%Indramayu%')
+                ->where('nama_instansi', Instansi::NAMA_PEMDA_INDRAMAYU)
                 ->orderBy('id')
                 ->value('id');
 

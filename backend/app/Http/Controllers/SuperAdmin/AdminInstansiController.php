@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\superadmin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\superadmin\SaveAdminInstansiRequest;
+use App\Http\Request\superadmin\SaveAdminInstansiRequest;
 use App\Models\Instansi;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -152,7 +152,7 @@ class AdminInstansiController extends Controller
     private function indramayuInstance(): ?Instansi
     {
         return Instansi::query()
-            ->where('nama_instansi', 'like', '%Indramayu%')
+            ->where('nama_instansi', Instansi::NAMA_PEMDA_INDRAMAYU)
             ->orderBy('id')
             ->first(['id', 'nama_instansi']);
     }
