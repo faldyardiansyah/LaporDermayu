@@ -376,9 +376,9 @@ class SplashView extends GetView<SplashController> {
 
                       const SizedBox(height: 12),
 
-                      // Title SafeRuas
+                      // Title LaporDermayu
                       Text(
-                            'SafeRuas',
+                            'LaporDermayu',
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 34,
                               fontWeight: FontWeight.w800,
@@ -589,7 +589,7 @@ class SplashView extends GetView<SplashController> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'SafeRuas AI • Smart Road System',
+                                  'LaporDermayu AI • Smart Road System',
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w500,

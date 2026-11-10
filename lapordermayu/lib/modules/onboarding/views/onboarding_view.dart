@@ -37,7 +37,7 @@ class OnboardingView extends GetView<OnboardingController> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'SafeRuas',
+                    'LaporDermayu',
                     style: GoogleFonts.plusJakartaSans(
                       color: AppColors.onboardingHeading,
                       fontSize: 17,

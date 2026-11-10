@@ -7,18 +7,26 @@ import 'package:get_storage/get_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
-  await GetStorage.init();
-  runApp(const SafeRuasApp());
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    debugPrint('Gagal load .env: $e');
+  }
+  try {
+    await GetStorage.init();
+  } catch (e) {
+    debugPrint('Gagal init GetStorage: $e');
+  }
+  runApp(const LaporDermayuApp());
 }
 
-class SafeRuasApp extends StatelessWidget {
-  const SafeRuasApp({super.key});
+class LaporDermayuApp extends StatelessWidget {
+  const LaporDermayuApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'SafeRuas',
+      title: 'LaporDermayu',
       debugShowCheckedModeBanner: false,
       initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,

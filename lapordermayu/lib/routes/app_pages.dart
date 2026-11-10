@@ -7,6 +7,8 @@ import 'package:lapordermayu/modules/auth/controllers/register_controller.dart';
 import 'package:lapordermayu/modules/auth/views/register_view.dart';
 import '../modules/splash/controllers/splash_controller.dart';
 import '../modules/splash/views/splash_view.dart';
+import 'package:lapordermayu/modules/main/views/main_view.dart';
+import 'package:lapordermayu/modules/main/controllers/main_controller.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -41,5 +43,12 @@ class AppPages {
         Get.lazyPut<RegisterController>(() => RegisterController());
       }),
     ),
+        GetPage(
+      name: AppRoutes.main,
+      page: () => const MainView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<MainController>(() => MainController());
+      }),
+        ),
   ];
 }
