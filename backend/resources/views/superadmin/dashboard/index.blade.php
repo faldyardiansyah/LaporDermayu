@@ -26,7 +26,9 @@
                 <p class="text-[10px] font-bold tracking-[1.5px] text-blue-700">PUSAT KENDALI SUPER ADMIN</p>
                 <h1 class="mt-2 text-2xl font-extrabold tracking-tight">Pemantauan LaporDermayu Indramayu</h1>
                 <p class="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">Pantau laporan, pengguna, dan progres penanganan dari data yang tercatat di LaporDermayu.</p>
-           
+            </div>
+            <a href="{{ route('superadmin.laporan.index') }}" class="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700">Buka seluruh laporan →</a>
+        </div>
 
         <div class="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-7" data-aos="fade-up">
             @foreach ($kartuStatistik as $item)
@@ -57,7 +59,7 @@
             </section>
 
             <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="category-title">
-            
+                <div class="flex items-start justify-between gap-3"><div><p class="text-[10px] font-bold uppercase tracking-wide text-blue-700">Distribusi jenis masalah</p><h2 id="category-title" class="mt-1 text-lg font-bold">Kategori kerusakan</h2><p class="mt-1 text-xs text-slate-500">Jumlah laporan dan status terkini per kategori database.</p></div><a href="{{ route('superadmin.laporan.index') }}" class="shrink-0 text-[10px] font-semibold text-blue-700 hover:underline">Lihat laporan</a></div>
                 <div class="mt-4 grid gap-3">
                     @forelse ($kategoriStatistik as $kategori)
                         <article class="rounded-xl bg-[#f2f5ff] p-4">
@@ -98,11 +100,11 @@
                 <aside class="flex max-h-[320px] flex-col border-t border-slate-100 min-[1200px]:max-h-[500px] min-[1200px]:border-t-0 min-[1200px]:border-l" aria-label="Laporan di area peta"><div class="border-b border-slate-100 p-4"><h3 class="text-xs font-bold">Laporan di area ini</h3><p id="map-list-summary" class="mt-1 text-[11px] text-slate-400">Memuat laporan...</p></div><div id="map-report-list" class="min-h-24 flex-1 divide-y divide-slate-100 overflow-y-auto" aria-busy="true"></div></aside>
             </div>
             <div class="flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 py-3"><p class="w-full text-[10px] text-slate-500">Peta sebaran laporan menggunakan batas cakupan Kabupaten Indramayu yang sudah dipakai aplikasi.</p><p id="map-message" class="flex-1 text-xs text-slate-500" role="status" aria-live="polite">Memuat peta...</p><button id="map-retry" type="button" class="cursor-pointer text-xs font-bold text-blue-700 hover:underline" hidden>Coba lagi</button></div>
-            <noscript><p class="border-t border-slate-100 p-4 text-sm text-slate-600">Daftar dan detail laporan tersedia melalui menu Seluruh Laporan.</p></noscript>
+            <noscript><p class="border-t border-slate-100 p-4 text-sm text-slate-600">Aktifkan JavaScript untuk menggunakan peta. Daftar dan detail laporan tersedia melalui menu Seluruh Laporan.</p></noscript>
         </section>
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-labelledby="recent-title">
-            
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5"><div><h2 id="recent-title" class="font-bold">Laporan terbaru</h2><p class="mt-1 text-xs text-slate-500">Data laporan terbaru pada wilayah yang dipantau.</p></div><a href="{{ route('superadmin.laporan.index') }}" class="text-xs font-semibold text-blue-700 hover:underline">Seluruh laporan →</a></div>
             <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-left text-xs [&_th]:bg-slate-50 [&_th]:px-4 [&_th]:py-3 [&_th]:font-semibold [&_th]:text-slate-500 [&_td]:border-t [&_td]:border-slate-100 [&_td]:px-4 [&_td]:py-3.5"><thead><tr><th scope="col">Laporan</th><th scope="col">Pelapor</th><th scope="col">Status</th><th scope="col">Tanggal</th><th scope="col"><span class="sr-only">Detail</span></th></tr></thead><tbody>
                 @forelse ($laporanTerbaru as $laporan)
                     @php($statusClass = match ($laporan->status) { 'menunggu' => 'bg-amber-50 text-amber-700', 'diproses' => 'bg-blue-50 text-blue-700', 'selesai' => 'bg-emerald-50 text-emerald-700', 'ditolak' => 'bg-rose-50 text-rose-700', default => 'bg-slate-100 text-slate-600' })

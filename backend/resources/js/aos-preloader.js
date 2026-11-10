@@ -59,6 +59,45 @@ export function initPreloader() {
         preloader.classList.add('preloader-hidden');
     };
 
+    const markNavigationPending = () => {
+        try {
+            window.sessionStorage.setItem('lapordermayu-navigation-pending', '1');
+        } catch {
+        }
+    };
+
+    const clearNavigationPending = () => {
+        try {
+            window.sessionStorage.removeItem('lapordermayu-navigation-pending');
+        } catch {
+        }
+    };
+
+    let navigationPending = false;
+    try {
+        navigationPending = window.sessionStorage.getItem('lapordermayu-navigation-pending') === '1';
+        window.sessionStorage.removeItem('lapordermayu-navigation-pending');
+    } catch {
+    }
+
+    if (navigationPending) {
+        preloader.classList.remove('preloader-hidden');
+        if (document.readyState === 'complete') {
+            hidePreloader();
+        } else {
+            window.addEventListener('load', hidePreloader, { once: true });
+        }
+    }
+
+    const showPreloader = (text = null) => {
+        markNavigationPending();
+        if (text) {
+            const textEl = preloader.querySelector('.preloader-text');
+            if (textEl) textEl.textContent = text;
+        }
+        preloader.classList.remove('preloader-hidden');
+    };
+
     document.addEventListener('click', (event) => {
         const link = event.target.closest('a');
         if (!link) return;
@@ -138,3 +177,18 @@ export function initSplashScreen() {
     window.setTimeout(hideSplash, 950);
 }
 
+export function initPasswordVisibility() {
+    document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+        const input = document.getElementById(button.getAttribute('aria-controls'));
+        if (!input) return;
+
+        button.addEventListener('click', () => {
+            const isVisible = input.type === 'text';
+            input.type = isVisible ? 'password' : 'text';
+            button.setAttribute('aria-pressed', String(!isVisible));
+            button.setAttribute('aria-label', isVisible ? 'Tampilkan password' : 'Sembunyikan password');
+            button.querySelector('[data-eye-open]').hidden = !isVisible;
+            button.querySelector('[data-eye-closed]').hidden = isVisible;
+        });
+    });
+}

@@ -29,14 +29,16 @@
                 <svg viewBox="0 0 24 24" fill="none" class="size-5" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6Zm6-3v15m6-12v15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
                 Dashboard
             </a>
-           
+            <a href="{{ route('superadmin.laporan.index') }}" @if (request()->routeIs('superadmin.laporan.index', 'superadmin.laporan.show')) aria-current="page" @endif class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold no-underline {{ request()->routeIs('superadmin.laporan.index', 'superadmin.laporan.show') ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50' }}">
                 <svg viewBox="0 0 24 24" fill="none" class="size-5" aria-hidden="true"><path d="M7 3h10v18H5V3h2Zm1 5h6m-6 4h8m-8 4h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
                 Seluruh laporan
             </a>
-             <svg viewBox="0 0 24 24" fill="none" class="size-5" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-5 8v-4h4v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <a href="{{ route('superadmin.admin_instansi.index') }}" @if (request()->routeIs('superadmin.admin_instansi.*')) aria-current="page" @endif class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold no-underline {{ request()->routeIs('superadmin.admin_instansi.*') ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50' }}">
+                <svg viewBox="0 0 24 24" fill="none" class="size-5" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-5 8v-4h4v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Admin Instansi
             </a>
-               <svg viewBox="0 0 24 24" fill="none" class="size-5" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M15 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.6"/></svg>
+            <a href="{{ route('superadmin.masyarakat.index') }}" @if (request()->routeIs('superadmin.masyarakat.*')) aria-current="page" @endif class="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold no-underline {{ request()->routeIs('superadmin.masyarakat.*') ? 'bg-[#2563eb] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50' }}">
+                <svg viewBox="0 0 24 24" fill="none" class="size-5" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M15 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.6"/></svg>
                 Masyarakat
             </a>
         </nav>

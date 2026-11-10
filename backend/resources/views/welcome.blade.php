@@ -29,11 +29,11 @@
     <main class="auth-card" data-aos="fade-up">
         <section class="auth-art" aria-label="LaporDermayu membantu menjaga perjalanan tetap aman">
             <div class="auth-art-copy">
-                <span class="auth-art-kicker">Lapor Dermayu, AMAN BERKENDARA</span>
+                <span class="auth-art-kicker">LAPOR DERMAYU, AMAN BERKENDARA</span>
                 <h1>Perjalanan aman<br>dimulai dari sini.</h1>
                 <p>Pantau dan tindak lanjuti laporan infrastruktur jalan bersama LaporDermayu.</p>
             </div>
-            <div class="auth-animation" id="lapordermayuAnimation" role="img" aria-label="Animasi bersepeda"></div>
+            <div class="auth-animation" id="laporDermayuAnimation" role="img" aria-label="Animasi bersepeda"></div>
             <span class="auth-orb auth-orb-one" aria-hidden="true"></span>
             <span class="auth-orb auth-orb-two" aria-hidden="true"></span>
         </section>
@@ -106,18 +106,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js" defer></script>
     <script>
         window.addEventListener('load', () => {
-            const splash = document.getElementById('app-splash');
-
-            if (splash) {
-                window.setTimeout(() => {
-                    splash.classList.add('splash-hidden');
-                    document.documentElement.classList.remove('show-splash');
-                }, 700);
-            }
-
             if (window.lottie) {
                 window.lottie.loadAnimation({
-                    container: document.getElementById('lapordermayuAnimation'),
+                    container: document.getElementById('laporDermayuAnimation'),
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
