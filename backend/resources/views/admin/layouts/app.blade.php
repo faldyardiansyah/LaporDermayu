@@ -39,20 +39,20 @@
         </div>
 
         <nav class="grid gap-1.5">
-            <div class="flex items-center gap-[13px] rounded-[10px] bg-[#eff6ff] p-[13px] text-xs font-semibold text-[#2563eb] shadow-[inset_3px_0_#2563eb]">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-[13px] rounded-[10px] p-[13px] text-xs font-semibold no-underline {{ request()->routeIs('admin.dashboard') ? 'bg-[#eff6ff] text-[#2563eb] shadow-[inset_3px_0_#2563eb]' : 'text-[#77859a] hover:bg-[#eff6ff] hover:text-[#2563eb]' }}">
                 <span class="w-5 text-center text-[19px]">▦</span>
                 <span>Dashboard</span>
-            </div>
+            </a>
 
-            <div class="flex items-center gap-[13px] rounded-[10px] p-[13px] text-xs font-semibold text-[#77859a]">
+            <a href="{{ route('admin.laporan.index') }}" class="flex items-center gap-[13px] rounded-[10px] p-[13px] text-xs font-semibold no-underline {{ request()->routeIs('admin.laporan.*') ? 'bg-[#eff6ff] text-[#2563eb] shadow-[inset_3px_0_#2563eb]' : 'text-[#77859a] hover:bg-[#eff6ff] hover:text-[#2563eb]' }}">
                 <span class="w-5 text-center text-[19px]">◤</span>
                 <span>Manajemen Laporan</span>
-            </div>
+            </a>
 
-            <div class="flex items-center gap-[13px] rounded-[10px] p-[13px] text-xs font-semibold text-[#77859a]">
+            <a href="{{ route('admin.statistik.index') }}" class="flex items-center gap-[13px] rounded-[10px] p-[13px] text-xs font-semibold no-underline {{ request()->routeIs('admin.statistik.*') ? 'bg-[#eff6ff] text-[#2563eb] shadow-[inset_3px_0_#2563eb]' : 'text-[#77859a] hover:bg-[#eff6ff] hover:text-[#2563eb]' }}">
                 <span class="w-5 text-center text-[19px]">▥</span>
                 <span>Statistik</span>
-            </div>
+            </a>
         </nav>
 
         <div class="mt-auto">

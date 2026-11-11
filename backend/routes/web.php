@@ -1,15 +1,15 @@
 <?php
 
-
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\StatistikController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\superadmin\AdminInstansiController;
 use App\Http\Controllers\superadmin\DashboardController as SuperAdminDashboardController;
 use App\Http\Controllers\superadmin\LaporanController as SuperAdminLaporanController;
 use App\Http\Controllers\superadmin\MasyarakatController;
 use App\Http\Controllers\superadmin\PetaLaporanController;
-use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/', [LoginController::class, 'create'])->name('home');
 
@@ -24,6 +24,25 @@ Route::middleware('auth')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+    });
+
+Route::middleware(['auth', 'admin.instansi'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/laporan', [LaporanController::class, 'index'])
+            ->name('laporan.index');
+
+        Route::get('/laporan/{id}', [LaporanController::class, 'show'])
+            ->whereNumber('id')
+            ->name('laporan.show');
+
+        Route::patch('/laporan/{id}/status', [LaporanController::class, 'updateStatus'])
+            ->whereNumber('id')
+            ->name('laporan.status.update');
+
+        Route::get('/statistik', [StatistikController::class, 'index'])
+            ->name('statistik.index');
     });
 
 Route::middleware(['auth', 'super.admin'])

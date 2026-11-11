@@ -16,9 +16,9 @@
                 <h1 class="mt-2 text-3xl font-extrabold tracking-tight max-[600px]:text-2xl">Monitoring Infrastruktur Jalan</h1>
                 <p class="mt-2 text-sm text-slate-600">Ringkasan laporan infrastruktur dan progres penanganan pada instansi Anda.</p>
             </div>
-            <span class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-3 text-xs font-bold text-white">
+            <a href="{{ route('admin.laporan.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-3 text-xs font-bold text-white hover:bg-blue-800">
                 Buka semua laporan <span aria-hidden="true">→</span>
-            </span>
+            </a>
         </div>
 
         <div class="grid grid-cols-5 gap-4 max-[1000px]:grid-cols-2 max-[560px]:grid-cols-1" data-aos="fade-up">
@@ -53,7 +53,7 @@
                     <h2 id="recent-title" class="text-xl font-bold">Laporan Masuk Terbaru</h2>
                     <p class="mt-1 text-sm text-slate-500">Daftar laporan kerusakan yang membutuhkan tindak lanjut instansi.</p>
                 </div>
-                <span class="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">Buka Semua Laporan →</span>
+                <a href="{{ route('admin.laporan.index') }}" class="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">Buka Semua Laporan →</a>
             </div>
 
             <div class="overflow-x-auto">
@@ -93,7 +93,7 @@
                                     <span class="rounded-full px-2.5 py-1 font-semibold {{ $statusClass }}">{{ ucfirst($laporan->status ?? 'Tidak diketahui') }}</span>
                                 </td>
                                 <td>
-                                    <span class="font-bold text-blue-700">Detail →</span>
+                                    <a href="{{ route('admin.laporan.show', $laporan->id) }}" class="font-bold text-blue-700 hover:underline">Detail →</a>
                                 </td>
                             </tr>
                         @empty
