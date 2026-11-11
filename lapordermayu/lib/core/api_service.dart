@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.9:8000/api';
+  static const String baseUrl = 'http://192.168.8.207:8000/api';
 
   static final GetStorage _box = GetStorage();
 

@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lapordermayu/utils/app_colors.dart';
-
+import 'package:lapordermayu/modules/home/views/home_view.dart';
+import 'package:lapordermayu/modules/profile/views/profile_view.dart';
+import 'package:lapordermayu/modules/riwayat/views/riwayat_view.dart';
 import '../controllers/main_controller.dart';
 
 
@@ -11,10 +13,10 @@ class MainView extends GetView<MainController> {
   const MainView({super.key});
 
   final List<Widget> pages = const [
-    Center(child: Text('Home Page')),
+    HomeView(),
     Center(child: Text('Maps Page')),
-    Center(child: Text('Riwayat Page')),
-    Center(child: Text('Profile Page')),
+    RiwayatView(),
+    ProfileView(),
   ];
 
   @override

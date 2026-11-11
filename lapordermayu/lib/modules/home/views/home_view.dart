@@ -1,0 +1,1292 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
+import 'package:lapordermayu/utils/app_colors.dart';
+import 'package:lapordermayu/utils/widgets/mega_mendung.dart';
+
+typedef QuickFeature = ({String label, IconData icon, Color color, Color bg});
+
+typedef ReportItem = ({
+  String title,
+  String subtitle,
+  String status,
+  Color statusColor,
+  Color statusBg,
+  Color? statusBorder,
+  String? image,
+  IconData icon,
+  Color iconColor,
+  Color thumbBg,
+});
+
+typedef ConditionItem = ({
+  String badge,
+  Color badgeColor,
+  Color badgeBg,
+  IconData? trailingIcon,
+  Color trailingIconColor,
+  String trailingText,
+  Color trailingTextColor,
+  String title,
+  String description,
+  String footer,
+  bool footerMono,
+  String actionLabel,
+  bool primaryAction,
+});
+
+typedef ImpactStat = ({String value, String label, Color color});
+
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  final ScrollController _scrollController = ScrollController();
+
+  bool _isLoading = false;
+  bool _isHeaderCollapsed = false;
+  bool _canPullToRefresh = false;
+  bool _hasUnreadNotification = true;
+
+  // Data Statis / Placeholder UI
+  final String _location = 'Indramayu, Jawa Barat';
+  final String _temperature = '29°C';
+  final String _weather = 'Cerah Berawan';
+  final String _weatherDesc = 'Jarak Pandang Baik • Mode Siang Aktif';
+  final String _humidity = '74% Lembap';
+  final String _wind = '12 km/j';
+  final int _pendingValidation = 0;
+  final int _nearbyCount = 0;
+  final int _nearbyFacilityCount = 0;
+
+  final List<QuickFeature> _quickFeatures = const [
+    (
+      label: 'Jalan Rusak',
+      icon: Icons.report_problem_rounded,
+      color: Color(0xFFE11D48),
+      bg: Color(0xFFFFF1F2),
+    ),
+    (
+      label: 'Lapor Fasilitas',
+      icon: Icons.lightbulb_outline_rounded,
+      color: Color(0xFFF59E0B),
+      bg: Color(0xFFFFFBEB),
+    ),
+    (
+      label: 'Rute Aman',
+      icon: Icons.alt_route_rounded,
+      color: Color(0xFF059669),
+      bg: Color(0xFFECFDF5),
+    ),
+  ];
+
+  final List<ReportItem> _recentReports = const [];
+  final List<ConditionItem> _conditions = const [];
+  final List<Map<String, dynamic>> _notifications = const [];
+
+  final List<ImpactStat> _impactStats = const [
+    (value: '0', label: 'Laporan', color: AppColors.homeBlue),
+    (value: '0', label: 'Terverifikasi', color: AppColors.emerald600),
+    (value: '0', label: 'Diperbaiki', color: AppColors.amber500),
+  ];
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onRefresh() async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: ColoredBox(
+        color: Colors.white,
+        child: Skeletonizer(
+          enabled: _isLoading,
+          effect: ShimmerEffect(
+            baseColor: AppColors.slate200,
+            highlightColor: AppColors.slate100,
+            duration: const Duration(milliseconds: 1400),
+          ),
+          child: Stack(
+            children: [
+              // 1. Konten scrollable di belakang header
+              Positioned.fill(
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  color: AppColors.homeBlue,
+                  backgroundColor: Colors.white,
+                  displacement: 40,
+                  edgeOffset: topInset + 60,
+                  notificationPredicate: (notification) {
+                    if (notification.depth != 0) return false;
+                    if (notification is ScrollStartNotification) {
+                      _canPullToRefresh =
+                          !_isHeaderCollapsed &&
+                          notification.metrics.pixels <= 0;
+                    }
+                    if (notification is ScrollEndNotification) {
+                      final allowed = _canPullToRefresh;
+                      _canPullToRefresh = false;
+                      return allowed;
+                    }
+                    return _canPullToRefresh && !_isHeaderCollapsed;
+                  },
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        final delta = notification.scrollDelta ?? 0;
+                        if (delta > 2 && !_isHeaderCollapsed) {
+                          setState(() => _isHeaderCollapsed = true);
+                        } else if (delta < -2 && _isHeaderCollapsed) {
+                          setState(() => _isHeaderCollapsed = false);
+                        }
+                      } else if (notification is OverscrollNotification) {
+                        final overscroll = notification.overscroll;
+                        if (overscroll > 2 && !_isHeaderCollapsed) {
+                          setState(() => _isHeaderCollapsed = true);
+                        } else if (overscroll < -2 && _isHeaderCollapsed) {
+                          setState(() => _isHeaderCollapsed = false);
+                        }
+                      }
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: ClampingScrollPhysics(),
+                      ),
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).padding.bottom + 110,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 320),
+                            curve: Curves.easeInOutCubic,
+                            height: _isHeaderCollapsed
+                                ? (topInset + 95)
+                                : (topInset + 260),
+                          ),
+
+                          _buildQuickFeatures()
+                              .animate()
+                              .fadeIn(delay: 100.ms, duration: 550.ms)
+                              .slideY(
+                                begin: 0.08,
+                                end: 0,
+                                delay: 100.ms,
+                                duration: 600.ms,
+                                curve: Curves.easeOutCubic,
+                              ),
+                          const SizedBox(height: 24),
+
+                          _buildImpact()
+                              .animate()
+                              .fadeIn(delay: 400.ms, duration: 550.ms)
+                              .slideY(
+                                begin: 0.08,
+                                end: 0,
+                                delay: 400.ms,
+                                duration: 600.ms,
+                                curve: Curves.easeOutCubic,
+                              ),
+                          const SizedBox(height: 24),
+
+                          _buildRecentReports()
+                              .animate()
+                              .fadeIn(delay: 200.ms, duration: 550.ms)
+                              .slideY(
+                                begin: 0.08,
+                                end: 0,
+                                delay: 200.ms,
+                                duration: 600.ms,
+                                curve: Curves.easeOutCubic,
+                              ),
+
+                          const SizedBox(height: 24),
+
+                          _buildConditions()
+                              .animate()
+                              .fadeIn(delay: 300.ms, duration: 550.ms)
+                              .slideY(
+                                begin: 0.08,
+                                end: 0,
+                                delay: 300.ms,
+                                duration: 600.ms,
+                                curve: Curves.easeOutCubic,
+                              ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // 2. Header Pinned (menempel rapi di paling atas, bebas dari tabrakan status bar)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _buildHeader(context)
+                    .animate()
+                    .fadeIn(duration: 650.ms, curve: Curves.easeOut)
+                    .slideY(
+                      begin: -0.06,
+                      end: 0,
+                      duration: 700.ms,
+                      curve: Curves.easeOutCubic,
+                    )
+                    .blur(
+                      begin: const Offset(0, 1),
+                      end: Offset.zero,
+                      duration: 650.ms,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ===== Helper =====
+  TextStyle _jakarta(
+    double size,
+    FontWeight weight,
+    Color color, {
+    double? height,
+    double? spacing,
+  }) {
+    return GoogleFonts.plusJakartaSans(
+      fontSize: size,
+      fontWeight: weight,
+      color: color,
+      height: height,
+      letterSpacing: spacing,
+    );
+  }
+
+  // Pengganti font Consolas dari Figma
+  TextStyle _mono(double size, Color color) {
+    return GoogleFonts.jetBrainsMono(fontSize: size, color: color, height: 1.5);
+  }
+
+  Widget _circle(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+
+  Widget _sectionTitle(String title, {Widget? trailing}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: _jakarta(
+                17,
+                FontWeight.w700,
+                AppColors.slate900,
+                spacing: -0.43,
+              ),
+            ),
+          ),
+          ?trailing,
+        ],
+      ),
+    );
+  }
+
+  Widget _pill({
+    required Widget child,
+    required Color color,
+    Color? border,
+    EdgeInsets padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    double radius = 999,
+  }) {
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
+        border: border != null ? Border.all(color: border) : null,
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final topInset = MediaQuery.of(context).padding.top;
+    final isCollapsed = _isHeaderCollapsed;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Background gradient biru dengan lengkung bawah
+        Skeleton.keep(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeInOutCubic,
+            height: isCollapsed ? (topInset + 74) : (topInset + 150),
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(
+              gradient: AppColors.homeHeaderGradient,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(38),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x2D1F5BFF),
+                  blurRadius: 28,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -135,
+                  top: topInset - 34,
+                  child: MegaMendung(
+                    width: 345,
+                    color: Colors.white.withValues(alpha: 0.24),
+                  ),
+                ),
+                Positioned(
+                  left: -160,
+                  top: topInset + 22,
+                  child: MegaMendung(
+                    width: 310,
+                    color: Colors.white.withValues(alpha: 0.20),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Konten: top bar + kartu cuaca dengan animasi mengecil
+        Padding(
+          padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTopBar(),
+              ClipRect(
+                child: AnimatedAlign(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeInOutCubic,
+                  alignment: Alignment.topCenter,
+                  heightFactor: isCollapsed ? 0.0 : 1.0,
+                  child: IgnorePointer(
+                    ignoring: isCollapsed,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: AnimatedScale(
+                        scale: isCollapsed ? 0.82 : 1.0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOutCubic,
+                        child: AnimatedOpacity(
+                          opacity: isCollapsed ? 0.0 : 1.0,
+                          duration: const Duration(milliseconds: 260),
+                          curve: Curves.easeInOutCubic,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onVerticalDragUpdate: (details) {
+                              final delta = details.primaryDelta ?? 0;
+                              if (delta < -2 && !_isHeaderCollapsed) {
+                                setState(() => _isHeaderCollapsed = true);
+                              } else if (delta > 2 && _isHeaderCollapsed) {
+                                setState(() => _isHeaderCollapsed = false);
+                              }
+                            },
+                            child: _buildWeatherCard(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopBar() {
+    final white85 = Colors.white.withValues(alpha: 0.85);
+
+    return Row(
+      children: [
+        _buildAvatar(),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined, size: 14, color: white85),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Lokasi saat ini',
+                    style: _jakarta(11, FontWeight.w500, white85, height: 1.5),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      _location,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _jakarta(
+                        14,
+                        FontWeight.w700,
+                        Colors.white,
+                        spacing: -0.35,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        _buildNotificationButton(),
+      ],
+    );
+  }
+
+  Widget _buildAvatar() {
+    return SizedBox(
+      width: 44,
+      height: 44,
+      child: Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.3),
+              boxShadow: const [
+                BoxShadow(color: Color(0x99FFFFFF), spreadRadius: 2),
+              ],
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/avatar.png',
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const ColoredBox(
+                  color: Colors.white,
+                  child: Center(
+                    child: Icon(Icons.person, color: AppColors.homeBlue),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: const Color(0xFF34D399),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationButton() {
+    return GestureDetector(
+      onTap: _showNotificationSheet,
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFF678FF9),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x3D000000),
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Icon(
+              Icons.notifications_none_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+            if (_hasUnreadNotification)
+              Positioned(
+                top: 7,
+                right: 7,
+                child: Container(
+                  width: 13,
+                  height: 13,
+                  decoration: BoxDecoration(
+                    color: AppColors.yellowAccent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.homeBlue, width: 2.5),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showNotificationSheet() {
+    setState(() => _hasUnreadNotification = false);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.65,
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: _notifications.isEmpty
+            ? Center(
+                child: Text(
+                  'Belum ada notifikasi terbaru.',
+                  style: _jakarta(13, FontWeight.w500, AppColors.slate500),
+                ),
+              )
+            : ListView.separated(
+                shrinkWrap: true,
+                itemCount: _notifications.length,
+                separatorBuilder: (_, _) => const Divider(height: 16),
+                itemBuilder: (_, i) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.notifications_active_rounded,
+                    color: AppColors.homeBlue,
+                  ),
+                  title: Text(
+                    '${_notifications[i]['judul'] ?? 'Notifikasi'}',
+                    style: _jakarta(13, FontWeight.w700, AppColors.slate900),
+                  ),
+                  subtitle: Text(
+                    '${_notifications[i]['pesan'] ?? ''}\n${_notifications[i]['waktu'] ?? ''}',
+                    style: _jakarta(11.5, FontWeight.w500, AppColors.slate500),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildWeatherCard() {
+    final white90 = Colors.white.withValues(alpha: 0.9);
+
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: AppColors.homeWeatherGradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x75000000),
+            blurRadius: 11.1,
+            offset: Offset(0, 4),
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 25,
+            offset: Offset(0, 20),
+            spreadRadius: -5,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -40,
+            top: -23,
+            child: _circle(144, Colors.white.withValues(alpha: 0.15)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: _temperature,
+                                  style: _jakarta(
+                                    24,
+                                    FontWeight.w800,
+                                    Colors.white,
+                                    spacing: -0.8,
+                                  ),
+                                ),
+                                const TextSpan(text: '  '),
+                                TextSpan(
+                                  text: _weather,
+                                  style: _jakarta(
+                                    14,
+                                    FontWeight.w700,
+                                    AppColors.yellowAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _weatherDesc,
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: white90,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _weatherInfo(
+                                Icons.water_drop_outlined,
+                                const Color(0xFF67E8F9),
+                                _humidity,
+                              ),
+                              const SizedBox(width: 12),
+                              _weatherInfo(
+                                Icons.air_rounded,
+                                AppColors.yellowAccent,
+                                _wind,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    _buildConditionBadge(),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Divider(height: 1, color: Colors.white.withValues(alpha: 0.2)),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(
+                      _nearbyFacilityCount == 0
+                          ? Icons.check_circle_outline_rounded
+                          : Icons.warning_amber_rounded,
+                      size: 13,
+                      color: white90,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        _nearbyFacilityCount == 0
+                            ? 'Penerangan Jalan (PJU) Optimal'
+                            : '$_nearbyFacilityCount laporan fasilitas di sekitar',
+                        style: _jakarta(10, FontWeight.w400, white90),
+                      ),
+                    ),
+                    _pill(
+                      color: _nearbyCount == 0
+                          ? AppColors.emerald500
+                          : AppColors.amber500,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _nearbyCount == 0
+                                ? Icons.shield_outlined
+                                : Icons.report_problem_outlined,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _nearbyCount == 0
+                                ? 'Belum ada laporan'
+                                : '$_nearbyCount laporan sekitar',
+                            style: _jakarta(
+                              10,
+                              FontWeight.w700,
+                              Colors.white,
+                              spacing: 0.25,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _weatherInfo(IconData icon, Color iconColor, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: iconColor),
+        const SizedBox(width: 4),
+        Text(text, style: _mono(10, Colors.white.withValues(alpha: 0.85))),
+      ],
+    );
+  }
+
+  Widget _buildConditionBadge() {
+    final safe = _nearbyCount == 0;
+
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x19000000),
+            blurRadius: 15,
+            offset: Offset(0, 10),
+            spreadRadius: -3,
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            safe ? Icons.nights_stay_outlined : Icons.warning_amber_rounded,
+            color: AppColors.yellowAccent,
+            size: 34,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            safe ? 'KONDISI BAIK' : 'WASPADA',
+            style: _jakarta(9, FontWeight.w700, Colors.white, spacing: -0.22),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickFeatures() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Fitur Cepat'),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 84,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: _quickFeatures.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 24),
+            itemBuilder: (_, i) {
+              final feature = _quickFeatures[i];
+              return GestureDetector(
+                onTap: () {},
+                child: Column(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.slate100),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x0C000000),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: feature.bg,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          feature.icon,
+                          color: feature.color,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      feature.label,
+                      style: _jakarta(
+                        11,
+                        FontWeight.w500,
+                        AppColors.slate700,
+                        height: 1.25,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentReports() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(
+          'Laporan Terkini Anda',
+          trailing: Text(
+            '$_pendingValidation Menunggu Validasi',
+            style: _jakarta(12, FontWeight.w500, AppColors.slate500),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_recentReports.isEmpty)
+          _buildEmptyState('Belum ada laporan terkini dari Anda.')
+        else
+          SizedBox(
+            height: 84,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: _recentReports.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (_, i) => _buildReportCard(_recentReports[i]),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildReportCard(ReportItem report) {
+    final fallbackIcon = Icon(report.icon, color: report.iconColor, size: 26);
+
+    return Container(
+      width: 250,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.homeCardTint,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: report.thumbBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: report.image != null
+                ? Image.network(
+                    report.image!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => fallbackIcon,
+                  )
+                : fallbackIcon,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  report.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _jakarta(
+                    12,
+                    FontWeight.w700,
+                    AppColors.slate900,
+                    height: 1.33,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  report.subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _jakarta(
+                    10,
+                    FontWeight.w400,
+                    AppColors.slate500,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                _pill(
+                  color: report.statusBg,
+                  border: report.statusBorder,
+                  child: Text(
+                    report.status,
+                    style: _jakarta(
+                      9,
+                      FontWeight.w600,
+                      report.statusColor,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              color: AppColors.slate100,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.sync_rounded,
+              size: 18,
+              color: AppColors.homeBlue,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConditions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(
+          'Kondisi Saat Ini',
+          trailing: GestureDetector(
+            onTap: () {},
+            child: Text(
+              'Lihat Peta',
+              style: _jakarta(12, FontWeight.w600, AppColors.homeBlue),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_conditions.isEmpty)
+          _buildEmptyState('Belum ada data kondisi ruas jalan.')
+        else
+          SizedBox(
+            height: 164,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: _conditions.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (_, i) => _buildConditionCard(_conditions[i]),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildConditionCard(ConditionItem item) {
+    return Container(
+      width: 270,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.homeCardTint,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.homeCardBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0C000000),
+            blurRadius: 16,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _pill(
+                color: item.badgeBg,
+                radius: 6,
+                child: Text(
+                  item.badge,
+                  style: _jakarta(
+                    9,
+                    FontWeight.w700,
+                    item.badgeColor,
+                    height: 1.5,
+                    spacing: 0.45,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              if (item.trailingIcon != null)
+                Icon(item.trailingIcon, size: 14, color: item.trailingIconColor)
+              else
+                _circle(6, item.trailingIconColor),
+              const SizedBox(width: 4),
+              Text(
+                item.trailingText,
+                style: _jakarta(10.5, FontWeight.w600, item.trailingTextColor),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            item.title,
+            style: _jakarta(
+              14,
+              FontWeight.w700,
+              AppColors.slate900,
+              height: 1.43,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            item.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: _jakarta(
+              11,
+              FontWeight.w400,
+              AppColors.slate600,
+              height: 1.38,
+            ),
+          ),
+          const Spacer(),
+          Divider(height: 1, color: Colors.white.withValues(alpha: 0.7)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.footer,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: item.footerMono
+                      ? _mono(10, AppColors.slate500)
+                      : _jakarta(10, FontWeight.w400, AppColors.slate500),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {},
+                child: _buildConditionAction(item),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConditionAction(ConditionItem item) {
+    final primary = item.primaryAction;
+    final foreground = primary ? Colors.white : AppColors.slate800;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: primary ? AppColors.homeBlue : AppColors.slate100,
+        borderRadius: BorderRadius.circular(999),
+        border: primary ? null : Border.all(color: AppColors.slate200),
+        boxShadow: primary
+            ? const [
+                BoxShadow(
+                  color: Color(0x3F1F5BFF),
+                  blurRadius: 6,
+                  offset: Offset(0, 4),
+                  spreadRadius: -1,
+                ),
+              ]
+            : null,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            item.actionLabel,
+            style: _jakarta(
+              11,
+              primary ? FontWeight.w700 : FontWeight.w600,
+              foreground,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            primary ? Icons.arrow_forward_rounded : Icons.chevron_right_rounded,
+            size: 13,
+            color: foreground,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpact() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle('Dampak Nyata Pengguna'),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              for (var i = 0; i < _impactStats.length; i++) ...[
+                if (i > 0) const SizedBox(width: 8),
+                Expanded(child: _buildStatCard(_impactStats[i])),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(ImpactStat stat) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.homeCardBorder),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x07000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            stat.value,
+            style: _jakarta(20, FontWeight.w800, stat.color, height: 1.4),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            stat.label,
+            style: _jakarta(
+              11,
+              FontWeight.w600,
+              AppColors.slate700,
+              height: 1.25,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.slate100,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.slate200),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Lottie.asset(
+              'assets/lotties/empty2.json',
+              width: 120,
+              height: 120,
+              fit: BoxFit.contain,
+              repeat: true,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: _jakarta(12, FontWeight.w500, AppColors.slate500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
