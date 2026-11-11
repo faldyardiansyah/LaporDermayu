@@ -1,35 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
+import 'package:lapordermayu/modules/profile/controllers/profile_controller.dart';
 import 'package:lapordermayu/utils/app_colors.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:lapordermayu/utils/widgets/mega_mendung.dart';
 
-class ProfileView extends StatefulWidget {
+class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
-  @override
-  State<ProfileView> createState() => _ProfileViewState();
-}
-
-class _ProfileViewState extends State<ProfileView> {
   TextStyle get jakarta => GoogleFonts.plusJakartaSans();
-
-  bool _isLoading = false;
-
-  // Data Statis / Placeholder UI
-  String _name = 'Pengguna Saferuas';
-  final String _email = 'pengguna@email.com';
-  String _phone = 'Belum ditambahkan';
-
-  Future<void> _onRefresh() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,52 +20,54 @@ class _ProfileViewState extends State<ProfileView> {
       child: Scaffold(
         backgroundColor: AppColors.slate100,
         body: RefreshIndicator(
-          onRefresh: _onRefresh,
+          onRefresh: controller.refreshProfile,
           color: AppColors.homeBlue,
           backgroundColor: Colors.white,
-          child: Skeletonizer(
-            enabled: _isLoading,
-            effect: const ShimmerEffect(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
-              ),
-              padding: const EdgeInsets.only(bottom: 125),
-              child: Column(
-                children: [
-                  _buildHeader(),
+          child: Obx(
+            () => Skeletonizer(
+              enabled: controller.isLoading.value,
+              effect: const ShimmerEffect(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: ClampingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.only(bottom: 125),
+                child: Column(
+                  children: [
+                    _buildHeader(),
 
-                  Transform.translate(
-                    offset: const Offset(0, -28),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          _buildProfileCard(),
-                          _buildSectionTitle(
-                            'INFORMASI AKUN',
-                            'Informasi pribadi kamu',
-                          ),
-                          _buildAccountCard(),
-                          _buildSectionTitle(
-                            'PENGATURAN',
-                            'Kelola akun dan aplikasi',
-                          ),
-                          _buildSettingsCard(),
-                          _buildSectionTitle(
-                            'INFORMASI LAINNYA',
-                            'Kami siap membantu kamu',
-                          ),
-                          _buildHelpCard(),
-                          const SizedBox(height: 15),
-                          _buildLogoutButton(),
-                          const SizedBox(height: 15),
-                          _buildFooter(),
-                        ],
+                    Transform.translate(
+                      offset: const Offset(0, -28),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          children: [
+                            _buildProfileCard(),
+                            _buildSectionTitle(
+                              'INFORMASI AKUN',
+                              'Informasi pribadi kamu',
+                            ),
+                            _buildAccountCard(),
+                            _buildSectionTitle(
+                              'PENGATURAN',
+                              'Kelola akun dan aplikasi',
+                            ),
+                            _buildSettingsCard(),
+                            _buildSectionTitle(
+                              'INFORMASI LAINNYA',
+                              'Kami siap membantu kamu',
+                            ),
+                            _buildHelpCard(),
+                            const SizedBox(height: 15),
+                            _buildLogoutButton(),
+                            const SizedBox(height: 15),
+                            _buildFooter(),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -94,7 +78,7 @@ class _ProfileViewState extends State<ProfileView> {
 
   Widget _buildHeader() {
     return Container(
-          height: 150,
+          height: 180,
           width: double.infinity,
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -148,20 +132,29 @@ class _ProfileViewState extends State<ProfileView> {
                             child: Image.asset(
                               'assets/images/logo.png',
                               fit: BoxFit.contain,
-                              height: 21,
-                              width: 21,
                             ),
                           ),
-              
                           const SizedBox(width: 12),
-                          Text(
-                            'Profil Pengguna',
-                            style: jakarta.copyWith(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Profile Pengguna',
+                                style: jakarta.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              Text(
+                                'Kelola informasi akun anda',
+                                style: jakarta.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                           const Spacer(),
                           Container(
@@ -185,7 +178,6 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                         ],
                       ),
-                      
                     ],
                   ),
                 ),
@@ -238,7 +230,7 @@ class _ProfileViewState extends State<ProfileView> {
                       child: Image.asset(
                         'assets/images/avatar.png',
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) {
+                        errorBuilder: (_, __, ___) {
                           return Container(
                             color: AppColors.homeCardTint,
                             child: Icon(
@@ -256,26 +248,30 @@ class _ProfileViewState extends State<ProfileView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _name,
-                          key: ValueKey(_name),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: jakarta.copyWith(
-                            color: AppColors.slate900,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ).animate().fadeIn(duration: 250.ms),
+                        Obx(
+                          () => Text(
+                            controller.name.value,
+                            key: ValueKey(controller.name.value),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: jakarta.copyWith(
+                              color: AppColors.slate900,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ).animate().fadeIn(duration: 250.ms),
+                        ),
                         const SizedBox(height: 5),
-                        Text(
-                          _email,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: jakarta.copyWith(
-                            color: AppColors.slate500,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
+                        Obx(
+                          () => Text(
+                            controller.email.value,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: jakarta.copyWith(
+                              color: AppColors.slate500,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 9),
@@ -317,7 +313,7 @@ class _ProfileViewState extends State<ProfileView> {
                     borderRadius: BorderRadius.circular(13),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(13),
-                      onTap: _showEditProfileDialog,
+                      onTap: controller.openEditProfile,
                       child: Padding(
                         padding: const EdgeInsets.all(11),
                         child: Icon(
@@ -342,12 +338,14 @@ class _ProfileViewState extends State<ProfileView> {
                   ),
                   const SizedBox(width: 9),
                   Expanded(
-                    child: Text(
-                      _phone,
-                      style: jakarta.copyWith(
-                        color: AppColors.slate600,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                    child: Obx(
+                      () => Text(
+                        controller.phone.value,
+                        style: jakarta.copyWith(
+                          color: AppColors.slate600,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -373,56 +371,6 @@ class _ProfileViewState extends State<ProfileView> {
           duration: 550.ms,
           curve: Curves.easeOutCubic,
         );
-  }
-
-  void _showEditProfileDialog() {
-    final nameCtrl = TextEditingController(text: _name);
-    final phoneCtrl = TextEditingController(
-      text: _phone == 'Belum ditambahkan' ? '' : _phone,
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit profil'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameCtrl,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Nama'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phoneCtrl,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Nomor telepon'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Batal'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final newName = nameCtrl.text.trim();
-              final newPhone = phoneCtrl.text.trim();
-              if (newName.isNotEmpty) {
-                setState(() {
-                  _name = newName;
-                  _phone = newPhone.isEmpty ? 'Belum ditambahkan' : newPhone;
-                });
-              }
-              Navigator.of(context).pop();
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildSectionTitle(String title, String subtitle) {
@@ -466,23 +414,29 @@ class _ProfileViewState extends State<ProfileView> {
           decoration: _cardDecoration(),
           child: Column(
             children: [
-              _buildInfoRow(
-                icon: Icons.person_outline_rounded,
-                label: 'Nama lengkap',
-                value: _name,
+              Obx(
+                () => _buildInfoRow(
+                  icon: Icons.person_outline_rounded,
+                  label: 'Nama lengkap',
+                  value: controller.name.value,
+                ),
               ),
               _divider(),
-              _buildInfoRow(
-                icon: Icons.email_outlined,
-                label: 'Alamat email',
-                value: _email,
+              Obx(
+                () => _buildInfoRow(
+                  icon: Icons.email_outlined,
+                  label: 'Alamat email',
+                  value: controller.email.value,
+                ),
               ),
               _divider(),
-              _buildInfoRow(
-                icon: Icons.phone_outlined,
-                label: 'Nomor telepon',
-                value: _phone,
-                isLast: true,
+              Obx(
+                () => _buildInfoRow(
+                  icon: Icons.phone_outlined,
+                  label: 'Nomor telepon',
+                  value: controller.phone.value,
+                  isLast: true,
+                ),
               ),
             ],
           ),
@@ -545,14 +499,14 @@ class _ProfileViewState extends State<ProfileView> {
                 icon: Icons.shield_outlined,
                 title: 'Keamanan akun',
                 subtitle: 'Pengaturan keamanan akun',
-                onTap: () {},
+                onTap: () => controller.openComingSoon('Keamanan akun'),
               ),
               _divider(),
               _buildMenuItem(
                 icon: Icons.tune_rounded,
                 title: 'Pengaturan aplikasi',
                 subtitle: 'Atur preferensi aplikasi',
-                onTap: () {},
+                onTap: () => controller.openComingSoon('Pengaturan aplikasi'),
               ),
             ],
           ),
@@ -572,14 +526,14 @@ class _ProfileViewState extends State<ProfileView> {
                 icon: Icons.support_agent_rounded,
                 title: 'Pusat bantuan',
                 subtitle: 'Temukan bantuan penggunaan aplikasi',
-                onTap: () {},
+                onTap: () => controller.openComingSoon('Pusat bantuan'),
               ),
               _divider(),
               _buildMenuItem(
                 icon: Icons.info_outline_rounded,
-                title: 'Tentang Saferuas',
+                title: 'Tentang LaporDermayu',
                 subtitle: 'Informasi mengenai aplikasi',
-                onTap: () {},
+                onTap: () => controller.openComingSoon('Tentang LaporDermayu'),
               ),
             ],
           ),
@@ -684,9 +638,8 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
+    Get.dialog(
+      Dialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
@@ -718,7 +671,7 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Apakah kamu yakin ingin keluar dari aplikasi Saferuas?',
+                'Apakah kamu yakin ingin keluar dari aplikasi LaporDermayu?',
                 textAlign: TextAlign.center,
                 style: jakarta.copyWith(
                   color: AppColors.slate500,
@@ -731,7 +684,7 @@ class _ProfileViewState extends State<ProfileView> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: Get.back,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.slate600,
                         side: BorderSide(color: AppColors.slate200),
@@ -752,7 +705,7 @@ class _ProfileViewState extends State<ProfileView> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: FilledButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: controller.logout,
                       style: FilledButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         shape: RoundedRectangleBorder(
@@ -776,6 +729,8 @@ class _ProfileViewState extends State<ProfileView> {
           ),
         ),
       ),
+      transitionCurve: Curves.easeOutBack,
+      transitionDuration: const Duration(milliseconds: 350),
     );
   }
 
@@ -788,7 +743,7 @@ class _ProfileViewState extends State<ProfileView> {
             Icon(Icons.shield_rounded, color: AppColors.homeBlue, size: 14),
             const SizedBox(width: 6),
             Text(
-              'SAFERUAS',
+              'LaporDermayu',
               style: jakarta.copyWith(
                 color: AppColors.slate500,
                 fontSize: 10,

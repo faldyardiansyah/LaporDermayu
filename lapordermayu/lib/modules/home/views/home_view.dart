@@ -1,115 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter_animate/flutter_animate.dart' hide ShimmerEffect;
 import 'package:lapordermayu/utils/app_colors.dart';
+import 'package:lapordermayu/modules/home/controllers/home_controller.dart';
 import 'package:lapordermayu/utils/widgets/mega_mendung.dart';
 
-typedef QuickFeature = ({String label, IconData icon, Color color, Color bg});
-
-typedef ReportItem = ({
-  String title,
-  String subtitle,
-  String status,
-  Color statusColor,
-  Color statusBg,
-  Color? statusBorder,
-  String? image,
-  IconData icon,
-  Color iconColor,
-  Color thumbBg,
-});
-
-typedef ConditionItem = ({
-  String badge,
-  Color badgeColor,
-  Color badgeBg,
-  IconData? trailingIcon,
-  Color trailingIconColor,
-  String trailingText,
-  Color trailingTextColor,
-  String title,
-  String description,
-  String footer,
-  bool footerMono,
-  String actionLabel,
-  bool primaryAction,
-});
-
-typedef ImpactStat = ({String value, String label, Color color});
-
-class HomeView extends StatefulWidget {
+class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
-
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  final ScrollController _scrollController = ScrollController();
-
-  bool _isLoading = false;
-  bool _isHeaderCollapsed = false;
-  bool _canPullToRefresh = false;
-  bool _hasUnreadNotification = true;
-
-  // Data Statis / Placeholder UI
-  final String _location = 'Indramayu, Jawa Barat';
-  final String _temperature = '29°C';
-  final String _weather = 'Cerah Berawan';
-  final String _weatherDesc = 'Jarak Pandang Baik • Mode Siang Aktif';
-  final String _humidity = '74% Lembap';
-  final String _wind = '12 km/j';
-  final int _pendingValidation = 0;
-  final int _nearbyCount = 0;
-  final int _nearbyFacilityCount = 0;
-
-  final List<QuickFeature> _quickFeatures = const [
-    (
-      label: 'Jalan Rusak',
-      icon: Icons.report_problem_rounded,
-      color: Color(0xFFE11D48),
-      bg: Color(0xFFFFF1F2),
-    ),
-    (
-      label: 'Lapor Fasilitas',
-      icon: Icons.lightbulb_outline_rounded,
-      color: Color(0xFFF59E0B),
-      bg: Color(0xFFFFFBEB),
-    ),
-    (
-      label: 'Rute Aman',
-      icon: Icons.alt_route_rounded,
-      color: Color(0xFF059669),
-      bg: Color(0xFFECFDF5),
-    ),
-  ];
-
-  final List<ReportItem> _recentReports = const [];
-  final List<ConditionItem> _conditions = const [];
-  final List<Map<String, dynamic>> _notifications = const [];
-
-  final List<ImpactStat> _impactStats = const [
-    (value: '0', label: 'Laporan', color: AppColors.homeBlue),
-    (value: '0', label: 'Terverifikasi', color: AppColors.emerald600),
-    (value: '0', label: 'Diperbaiki', color: AppColors.amber500),
-  ];
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _onRefresh() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,152 +20,163 @@ class _HomeViewState extends State<HomeView> {
       value: SystemUiOverlayStyle.light,
       child: ColoredBox(
         color: Colors.white,
-        child: Skeletonizer(
-          enabled: _isLoading,
-          effect: ShimmerEffect(
-            baseColor: AppColors.slate200,
-            highlightColor: AppColors.slate100,
-            duration: const Duration(milliseconds: 1400),
-          ),
-          child: Stack(
-            children: [
-              // 1. Konten scrollable di belakang header
-              Positioned.fill(
-                child: RefreshIndicator(
-                  onRefresh: _onRefresh,
-                  color: AppColors.homeBlue,
-                  backgroundColor: Colors.white,
-                  displacement: 40,
-                  edgeOffset: topInset + 60,
-                  notificationPredicate: (notification) {
-                    if (notification.depth != 0) return false;
-                    if (notification is ScrollStartNotification) {
-                      _canPullToRefresh =
-                          !_isHeaderCollapsed &&
-                          notification.metrics.pixels <= 0;
-                    }
-                    if (notification is ScrollEndNotification) {
-                      final allowed = _canPullToRefresh;
-                      _canPullToRefresh = false;
-                      return allowed;
-                    }
-                    return _canPullToRefresh && !_isHeaderCollapsed;
-                  },
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) {
-                      if (notification is ScrollUpdateNotification) {
-                        final delta = notification.scrollDelta ?? 0;
-                        if (delta > 2 && !_isHeaderCollapsed) {
-                          setState(() => _isHeaderCollapsed = true);
-                        } else if (delta < -2 && _isHeaderCollapsed) {
-                          setState(() => _isHeaderCollapsed = false);
-                        }
-                      } else if (notification is OverscrollNotification) {
-                        final overscroll = notification.overscroll;
-                        if (overscroll > 2 && !_isHeaderCollapsed) {
-                          setState(() => _isHeaderCollapsed = true);
-                        } else if (overscroll < -2 && _isHeaderCollapsed) {
-                          setState(() => _isHeaderCollapsed = false);
-                        }
+        child: Obx(() {
+          final isLoading = controller.isLoading.value;
+
+          return Skeletonizer(
+            enabled: isLoading,
+            effect: ShimmerEffect(
+              baseColor: AppColors.slate200,
+              highlightColor: AppColors.slate100,
+              duration: const Duration(milliseconds: 1400),
+            ),
+            child: Stack(
+              children: [
+                // 1. Konten scrollable di belakang header
+                Positioned.fill(
+                  child: RefreshIndicator(
+                    onRefresh: controller.refreshHomeData,
+                    color: AppColors.homeBlue,
+                    backgroundColor: Colors.white,
+                    displacement: 40,
+                    edgeOffset: topInset + 60,
+                    notificationPredicate: (notification) {
+                      if (notification.depth != 0) return false;
+                      if (notification is ScrollStartNotification) {
+                        controller.canPullToRefresh =
+                            !controller.isHeaderCollapsed.value &&
+                            notification.metrics.pixels <= 0;
                       }
-                      return false;
+                      if (notification is ScrollEndNotification) {
+                        final allowed = controller.canPullToRefresh;
+                        controller.canPullToRefresh = false;
+                        return allowed;
+                      }
+                      return controller.canPullToRefresh &&
+                          !controller.isHeaderCollapsed.value;
                     },
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(
-                        parent: ClampingScrollPhysics(),
-                      ),
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).padding.bottom + 110,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 320),
-                            curve: Curves.easeInOutCubic,
-                            height: _isHeaderCollapsed
-                                ? (topInset + 95)
-                                : (topInset + 260),
-                          ),
-
-                          _buildQuickFeatures()
-                              .animate()
-                              .fadeIn(delay: 100.ms, duration: 550.ms)
-                              .slideY(
-                                begin: 0.08,
-                                end: 0,
-                                delay: 100.ms,
-                                duration: 600.ms,
-                                curve: Curves.easeOutCubic,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        if (notification is ScrollUpdateNotification) {
+                          final delta = notification.scrollDelta ?? 0;
+                          if (delta > 2 &&
+                              !controller.isHeaderCollapsed.value) {
+                            controller.isHeaderCollapsed.value = true;
+                          } else if (delta < -2 &&
+                              controller.isHeaderCollapsed.value) {
+                            controller.isHeaderCollapsed.value = false;
+                          }
+                        } else if (notification is OverscrollNotification) {
+                          final overscroll = notification.overscroll;
+                          if (overscroll > 2 &&
+                              !controller.isHeaderCollapsed.value) {
+                            controller.isHeaderCollapsed.value = true;
+                          } else if (overscroll < -2 &&
+                              controller.isHeaderCollapsed.value) {
+                            controller.isHeaderCollapsed.value = false;
+                          }
+                        }
+                        return false;
+                      },
+                      child: SingleChildScrollView(
+                        controller: controller.scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: ClampingScrollPhysics(),
+                        ),
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).padding.bottom + 110,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Obx(
+                              () => AnimatedContainer(
+                                duration: const Duration(milliseconds: 320),
+                                curve: Curves.easeInOutCubic,
+                                height: controller.isHeaderCollapsed.value
+                                    ? (topInset + 95)
+                                    : (topInset + 260),
                               ),
-                          const SizedBox(height: 24),
+                            ),
 
-                          _buildImpact()
-                              .animate()
-                              .fadeIn(delay: 400.ms, duration: 550.ms)
-                              .slideY(
-                                begin: 0.08,
-                                end: 0,
-                                delay: 400.ms,
-                                duration: 600.ms,
-                                curve: Curves.easeOutCubic,
-                              ),
-                          const SizedBox(height: 24),
+                            _buildQuickFeatures()
+                                .animate()
+                                .fadeIn(delay: 100.ms, duration: 550.ms)
+                                .slideY(
+                                  begin: 0.08,
+                                  end: 0,
+                                  delay: 100.ms,
+                                  duration: 600.ms,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                            const SizedBox(height: 24),
 
-                          _buildRecentReports()
-                              .animate()
-                              .fadeIn(delay: 200.ms, duration: 550.ms)
-                              .slideY(
-                                begin: 0.08,
-                                end: 0,
-                                delay: 200.ms,
-                                duration: 600.ms,
-                                curve: Curves.easeOutCubic,
-                              ),
+                            _buildImpact()
+                                .animate()
+                                .fadeIn(delay: 400.ms, duration: 550.ms)
+                                .slideY(
+                                  begin: 0.08,
+                                  end: 0,
+                                  delay: 400.ms,
+                                  duration: 600.ms,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                            const SizedBox(height: 24),
 
-                          const SizedBox(height: 24),
+                            _buildRecentReports()
+                                .animate()
+                                .fadeIn(delay: 200.ms, duration: 550.ms)
+                                .slideY(
+                                  begin: 0.08,
+                                  end: 0,
+                                  delay: 200.ms,
+                                  duration: 600.ms,
+                                  curve: Curves.easeOutCubic,
+                                ),
 
-                          _buildConditions()
-                              .animate()
-                              .fadeIn(delay: 300.ms, duration: 550.ms)
-                              .slideY(
-                                begin: 0.08,
-                                end: 0,
-                                delay: 300.ms,
-                                duration: 600.ms,
-                                curve: Curves.easeOutCubic,
-                              ),
-                        ],
+                            const SizedBox(height: 24),
+
+                            _buildConditions()
+                                .animate()
+                                .fadeIn(delay: 300.ms, duration: 550.ms)
+                                .slideY(
+                                  begin: 0.08,
+                                  end: 0,
+                                  delay: 300.ms,
+                                  duration: 600.ms,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              // 2. Header Pinned (menempel rapi di paling atas, bebas dari tabrakan status bar)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _buildHeader(context)
-                    .animate()
-                    .fadeIn(duration: 650.ms, curve: Curves.easeOut)
-                    .slideY(
-                      begin: -0.06,
-                      end: 0,
-                      duration: 700.ms,
-                      curve: Curves.easeOutCubic,
-                    )
-                    .blur(
-                      begin: const Offset(0, 1),
-                      end: Offset.zero,
-                      duration: 650.ms,
-                    ),
-              ),
-            ],
-          ),
-        ),
+                // 2. Header Pinned (menempel rapi di paling atas, bebas dari tabrakan status bar)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildHeader(context)
+                      .animate()
+                      .fadeIn(duration: 650.ms, curve: Curves.easeOut)
+                      .slideY(
+                        begin: -0.06,
+                        end: 0,
+                        duration: 700.ms,
+                        curve: Curves.easeOutCubic,
+                      )
+                      .blur(
+                        begin: const Offset(0, 1),
+                        end: Offset.zero,
+                        duration: 650.ms,
+                      ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -341,101 +253,106 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildHeader(BuildContext context) {
     final topInset = MediaQuery.of(context).padding.top;
-    final isCollapsed = _isHeaderCollapsed;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        // Background gradient biru dengan lengkung bawah
-        Skeleton.keep(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 320),
-            curve: Curves.easeInOutCubic,
-            height: isCollapsed ? (topInset + 74) : (topInset + 150),
-            clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-              gradient: AppColors.homeHeaderGradient,
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(38),
+    return Obx(() {
+      final isCollapsed = controller.isHeaderCollapsed.value;
+
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Background gradient biru dengan lengkung bawah (animasi mengecil langsung & halus)
+          Skeleton.keep(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 320),
+              curve: Curves.easeInOutCubic,
+              height: isCollapsed ? (topInset + 74) : (topInset + 150),
+              clipBehavior: Clip.antiAlias,
+              decoration: const BoxDecoration(
+                gradient: AppColors.homeHeaderGradient,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(38),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x2D1F5BFF),
+                    blurRadius: 28,
+                    offset: Offset(0, 10),
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x2D1F5BFF),
-                  blurRadius: 28,
-                  offset: Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -135,
-                  top: topInset - 34,
-                  child: MegaMendung(
-                    width: 345,
-                    color: Colors.white.withValues(alpha: 0.24),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -135,
+                    top: topInset - 34,
+                    child: MegaMendung(
+                      width: 345,
+                      color: Colors.white.withValues(alpha: 0.24),
+                    ),
                   ),
-                ),
-                Positioned(
-                  left: -160,
-                  top: topInset + 22,
-                  child: MegaMendung(
-                    width: 310,
-                    color: Colors.white.withValues(alpha: 0.20),
+                  Positioned(
+                    left: -160,
+                    top: topInset + 22,
+                    child: MegaMendung(
+                      width: 310,
+                      color: Colors.white.withValues(alpha: 0.20),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        // Konten: top bar + kartu cuaca dengan animasi mengecil
-        Padding(
-          padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTopBar(),
-              ClipRect(
-                child: AnimatedAlign(
-                  duration: const Duration(milliseconds: 320),
-                  curve: Curves.easeInOutCubic,
-                  alignment: Alignment.topCenter,
-                  heightFactor: isCollapsed ? 0.0 : 1.0,
-                  child: IgnorePointer(
-                    ignoring: isCollapsed,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: AnimatedScale(
-                        scale: isCollapsed ? 0.82 : 1.0,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOutCubic,
-                        child: AnimatedOpacity(
-                          opacity: isCollapsed ? 0.0 : 1.0,
-                          duration: const Duration(milliseconds: 260),
+          // Konten: top bar + kartu cuaca dengan animasi mengecil
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, topInset + 12, 20, 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTopBar(),
+                ClipRect(
+                  child: AnimatedAlign(
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.easeInOutCubic,
+                    alignment: Alignment.topCenter,
+                    heightFactor: isCollapsed ? 0.0 : 1.0,
+                    child: IgnorePointer(
+                      ignoring: isCollapsed,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: AnimatedScale(
+                          scale: isCollapsed ? 0.82 : 1.0,
+                          duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOutCubic,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onVerticalDragUpdate: (details) {
-                              final delta = details.primaryDelta ?? 0;
-                              if (delta < -2 && !_isHeaderCollapsed) {
-                                setState(() => _isHeaderCollapsed = true);
-                              } else if (delta > 2 && _isHeaderCollapsed) {
-                                setState(() => _isHeaderCollapsed = false);
-                              }
-                            },
-                            child: _buildWeatherCard(),
+                          child: AnimatedOpacity(
+                            opacity: isCollapsed ? 0.0 : 1.0,
+                            duration: const Duration(milliseconds: 260),
+                            curve: Curves.easeInOutCubic,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onVerticalDragUpdate: (details) {
+                                final delta = details.primaryDelta ?? 0;
+                                if (delta < -2 &&
+                                    !controller.isHeaderCollapsed.value) {
+                                  controller.isHeaderCollapsed.value = true;
+                                } else if (delta > 2 &&
+                                    controller.isHeaderCollapsed.value) {
+                                  controller.isHeaderCollapsed.value = false;
+                                }
+                              },
+                              child: _buildWeatherCard(),
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 
   Widget _buildTopBar() {
@@ -462,15 +379,17 @@ class _HomeViewState extends State<HomeView> {
               Row(
                 children: [
                   Flexible(
-                    child: Text(
-                      _location,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: _jakarta(
-                        14,
-                        FontWeight.w700,
-                        Colors.white,
-                        spacing: -0.35,
+                    child: Obx(
+                      () => Text(
+                        controller.location.value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _jakarta(
+                          14,
+                          FontWeight.w700,
+                          Colors.white,
+                          spacing: -0.35,
+                        ),
                       ),
                     ),
                   ),
@@ -555,75 +474,77 @@ class _HomeViewState extends State<HomeView> {
             ),
           ],
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            const Icon(
-              Icons.notifications_none_rounded,
-              color: Colors.white,
-              size: 22,
-            ),
-            if (_hasUnreadNotification)
-              Positioned(
-                top: 7,
-                right: 7,
-                child: Container(
-                  width: 13,
-                  height: 13,
-                  decoration: BoxDecoration(
-                    color: AppColors.yellowAccent,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.homeBlue, width: 2.5),
+        child: Obx(
+          () => Stack(
+            alignment: Alignment.center,
+            children: [
+              const Icon(
+                Icons.notifications_none_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              if (controller.hasUnreadNotification.value)
+                Positioned(
+                  top: 7,
+                  right: 7,
+                  child: Container(
+                    width: 13,
+                    height: 13,
+                    decoration: BoxDecoration(
+                      color: AppColors.yellowAccent,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.homeBlue, width: 2.5),
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   void _showNotificationSheet() {
-    setState(() => _hasUnreadNotification = false);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.65,
-        ),
+    controller.markNotificationsRead();
+    Get.bottomSheet(
+      Container(
+        constraints: BoxConstraints(maxHeight: Get.height * 0.65),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: _notifications.isEmpty
-            ? Center(
-                child: Text(
-                  'Belum ada notifikasi terbaru.',
-                  style: _jakarta(13, FontWeight.w500, AppColors.slate500),
-                ),
-              )
-            : ListView.separated(
-                shrinkWrap: true,
-                itemCount: _notifications.length,
-                separatorBuilder: (_, _) => const Divider(height: 16),
-                itemBuilder: (_, i) => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
-                    Icons.notifications_active_rounded,
-                    color: AppColors.homeBlue,
-                  ),
-                  title: Text(
-                    '${_notifications[i]['judul'] ?? 'Notifikasi'}',
-                    style: _jakarta(13, FontWeight.w700, AppColors.slate900),
-                  ),
-                  subtitle: Text(
-                    '${_notifications[i]['pesan'] ?? ''}\n${_notifications[i]['waktu'] ?? ''}',
-                    style: _jakarta(11.5, FontWeight.w500, AppColors.slate500),
-                  ),
-                ),
+        child: Obx(() {
+          final items = controller.notifications;
+          if (items.isEmpty) {
+            return Center(
+              child: Text(
+                'Belum ada notifikasi terbaru.',
+                style: _jakarta(13, FontWeight.w500, AppColors.slate500),
               ),
+            );
+          }
+          return ListView.separated(
+            shrinkWrap: true,
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const Divider(height: 16),
+            itemBuilder: (_, i) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.notifications_active_rounded,
+                color: AppColors.homeBlue,
+              ),
+              title: Text(
+                '${items[i]['judul'] ?? 'Notifikasi'}',
+                style: _jakarta(13, FontWeight.w700, AppColors.slate900),
+              ),
+              subtitle: Text(
+                '${items[i]['pesan'] ?? ''}\n${items[i]['waktu'] ?? ''}',
+                style: _jakarta(11.5, FontWeight.w500, AppColors.slate500),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -669,54 +590,60 @@ class _HomeViewState extends State<HomeView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: _temperature,
-                                  style: _jakarta(
-                                    24,
-                                    FontWeight.w800,
-                                    Colors.white,
-                                    spacing: -0.8,
+                          Obx(
+                            () => Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: controller.temperature.value,
+                                    style: _jakarta(
+                                      24,
+                                      FontWeight.w800,
+                                      Colors.white,
+                                      spacing: -0.8,
+                                    ),
                                   ),
-                                ),
-                                const TextSpan(text: '  '),
-                                TextSpan(
-                                  text: _weather,
-                                  style: _jakarta(
-                                    14,
-                                    FontWeight.w700,
-                                    AppColors.yellowAccent,
+                                  const TextSpan(text: '  '),
+                                  TextSpan(
+                                    text: controller.weather.value,
+                                    style: _jakarta(
+                                      14,
+                                      FontWeight.w700,
+                                      AppColors.yellowAccent,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(height: 3),
-                          Text(
-                            _weatherDesc,
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: white90,
-                              height: 1.5,
+                          Obx(
+                            () => Text(
+                              controller.weatherDesc.value,
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                color: white90,
+                                height: 1.5,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              _weatherInfo(
-                                Icons.water_drop_outlined,
-                                const Color(0xFF67E8F9),
-                                _humidity,
-                              ),
-                              const SizedBox(width: 12),
-                              _weatherInfo(
-                                Icons.air_rounded,
-                                AppColors.yellowAccent,
-                                _wind,
-                              ),
-                            ],
+                          Obx(
+                            () => Row(
+                              children: [
+                                _weatherInfo(
+                                  Icons.water_drop_outlined,
+                                  const Color(0xFF67E8F9),
+                                  controller.humidity.value,
+                                ),
+                                const SizedBox(width: 12),
+                                _weatherInfo(
+                                  Icons.air_rounded,
+                                  AppColors.yellowAccent,
+                                  controller.wind.value,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -730,55 +657,63 @@ class _HomeViewState extends State<HomeView> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    Icon(
-                      _nearbyFacilityCount == 0
-                          ? Icons.check_circle_outline_rounded
-                          : Icons.warning_amber_rounded,
-                      size: 13,
-                      color: white90,
+                    Obx(
+                      () => Icon(
+                        controller.nearbyFacilityCount.value == 0
+                            ? Icons.check_circle_outline_rounded
+                            : Icons.warning_amber_rounded,
+                        size: 13,
+                        color: white90,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
-                      child: Text(
-                        _nearbyFacilityCount == 0
-                            ? 'Penerangan Jalan (PJU) Optimal'
-                            : '$_nearbyFacilityCount laporan fasilitas di sekitar',
-                        style: _jakarta(10, FontWeight.w400, white90),
+                      child: Obx(
+                        () => Text(
+                          controller.nearbyFacilityCount.value == 0
+                              ? 'Penerangan Jalan (PJU) Optimal'
+                              : '${controller.nearbyFacilityCount.value} laporan fasilitas di sekitar',
+                          style: _jakarta(10, FontWeight.w400, white90),
+                        ),
                       ),
                     ),
-                    _pill(
-                      color: _nearbyCount == 0
-                          ? AppColors.emerald500
-                          : AppColors.amber500,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _nearbyCount == 0
-                                ? Icons.shield_outlined
-                                : Icons.report_problem_outlined,
-                            size: 12,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _nearbyCount == 0
-                                ? 'Belum ada laporan'
-                                : '$_nearbyCount laporan sekitar',
-                            style: _jakarta(
-                              10,
-                              FontWeight.w700,
-                              Colors.white,
-                              spacing: 0.25,
+                    Obx(() {
+                      final count = controller.nearbyCount.value;
+
+                      return _pill(
+                        color: count == 0
+                            ? AppColors.emerald500
+                            : AppColors.amber500,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              count == 0
+                                  ? Icons.shield_outlined
+                                  : Icons.report_problem_outlined,
+                              size: 12,
+                              color: Colors.white,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                            const SizedBox(width: 4),
+                            Text(
+                              count == 0
+                                  ? 'Belum ada laporan'
+                                  : '$count laporan sekitar',
+                              style: _jakarta(
+                                10,
+                                FontWeight.w700,
+                                Colors.white,
+                                spacing: 0.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ],
@@ -800,8 +735,6 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Widget _buildConditionBadge() {
-    final safe = _nearbyCount == 0;
-
     return Container(
       width: 80,
       height: 80,
@@ -818,21 +751,25 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            safe ? Icons.nights_stay_outlined : Icons.warning_amber_rounded,
-            color: AppColors.yellowAccent,
-            size: 34,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            safe ? 'KONDISI BAIK' : 'WASPADA',
-            style: _jakarta(9, FontWeight.w700, Colors.white, spacing: -0.22),
-          ),
-        ],
-      ),
+      child: Obx(() {
+        final safe = controller.nearbyCount.value == 0;
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              safe ? Icons.nights_stay_outlined : Icons.warning_amber_rounded,
+              color: AppColors.yellowAccent,
+              size: 34,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              safe ? 'KONDISI BAIK' : 'WASPADA',
+              style: _jakarta(9, FontWeight.w700, Colors.white, spacing: -0.22),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -848,12 +785,12 @@ class _HomeViewState extends State<HomeView> {
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: _quickFeatures.length,
+            itemCount: controller.quickFeatures.length,
             separatorBuilder: (_, _) => const SizedBox(width: 24),
             itemBuilder: (_, i) {
-              final feature = _quickFeatures[i];
+              final feature = controller.quickFeatures[i];
               return GestureDetector(
-                onTap: () {},
+                onTap: () => controller.onFeatureTap(feature.label),
                 child: Column(
                   children: [
                     Container(
@@ -912,26 +849,31 @@ class _HomeViewState extends State<HomeView> {
       children: [
         _sectionTitle(
           'Laporan Terkini Anda',
-          trailing: Text(
-            '$_pendingValidation Menunggu Validasi',
-            style: _jakarta(12, FontWeight.w500, AppColors.slate500),
+          trailing: Obx(
+            () => Text(
+              '${controller.pendingValidation.value} Menunggu Validasi',
+              style: _jakarta(12, FontWeight.w500, AppColors.slate500),
+            ),
           ),
         ),
         const SizedBox(height: 12),
-        if (_recentReports.isEmpty)
-          _buildEmptyState('Belum ada laporan terkini dari Anda.')
-        else
-          SizedBox(
+        Obx(() {
+          if (controller.recentReports.isEmpty) {
+            return _buildEmptyState('Belum ada laporan terkini dari Anda.');
+          }
+          return SizedBox(
             height: 84,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               clipBehavior: Clip.none,
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: _recentReports.length,
+              itemCount: controller.recentReports.length,
               separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (_, i) => _buildReportCard(_recentReports[i]),
+              itemBuilder: (_, i) =>
+                  _buildReportCard(controller.recentReports[i]),
             ),
-          ),
+          );
+        }),
       ],
     );
   }
@@ -1036,7 +978,7 @@ class _HomeViewState extends State<HomeView> {
         _sectionTitle(
           'Kondisi Saat Ini',
           trailing: GestureDetector(
-            onTap: () {},
+            onTap: controller.openMap,
             child: Text(
               'Lihat Peta',
               style: _jakarta(12, FontWeight.w600, AppColors.homeBlue),
@@ -1044,20 +986,23 @@ class _HomeViewState extends State<HomeView> {
           ),
         ),
         const SizedBox(height: 12),
-        if (_conditions.isEmpty)
-          _buildEmptyState('Belum ada data kondisi ruas jalan.')
-        else
-          SizedBox(
+        Obx(() {
+          if (controller.conditions.isEmpty) {
+            return _buildEmptyState('Belum ada data kondisi ruas jalan.');
+          }
+          return SizedBox(
             height: 164,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               clipBehavior: Clip.none,
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: _conditions.length,
+              itemCount: controller.conditions.length,
               separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (_, i) => _buildConditionCard(_conditions[i]),
+              itemBuilder: (_, i) =>
+                  _buildConditionCard(controller.conditions[i]),
             ),
-          ),
+          );
+        }),
       ],
     );
   }
@@ -1147,7 +1092,7 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: controller.openMap,
                 child: _buildConditionAction(item),
               ),
             ],
@@ -1208,13 +1153,15 @@ class _HomeViewState extends State<HomeView> {
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              for (var i = 0; i < _impactStats.length; i++) ...[
-                if (i > 0) const SizedBox(width: 8),
-                Expanded(child: _buildStatCard(_impactStats[i])),
+          child: Obx(
+            () => Row(
+              children: [
+                for (var i = 0; i < controller.impactStats.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(child: _buildStatCard(controller.impactStats[i])),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],

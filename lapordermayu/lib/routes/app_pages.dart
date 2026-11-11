@@ -9,6 +9,9 @@ import '../modules/splash/controllers/splash_controller.dart';
 import '../modules/splash/views/splash_view.dart';
 import 'package:lapordermayu/modules/main/views/main_view.dart';
 import 'package:lapordermayu/modules/main/controllers/main_controller.dart';
+import 'package:lapordermayu/modules/profile/controllers/profile_controller.dart';
+import 'package:lapordermayu/modules/riwayat/controllers/riwayat_controller.dart';
+import 'package:lapordermayu/modules/home/controllers/home_controller.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -43,12 +46,15 @@ class AppPages {
         Get.lazyPut<RegisterController>(() => RegisterController());
       }),
     ),
-        GetPage(
+    GetPage(
       name: AppRoutes.main,
       page: () => const MainView(),
       binding: BindingsBuilder(() {
         Get.lazyPut<MainController>(() => MainController());
+        Get.lazyPut<ProfileController>(() => ProfileController());
+        Get.lazyPut<RiwayatController>(() => RiwayatController());
+        Get.lazyPut<HomeController>(() => HomeController());
       }),
-        ),
+    ),
   ];
 }
