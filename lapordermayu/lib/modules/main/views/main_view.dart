@@ -6,6 +6,7 @@ import 'package:lapordermayu/utils/app_colors.dart';
 import 'package:lapordermayu/modules/home/views/home_view.dart';
 import 'package:lapordermayu/modules/profile/views/profile_view.dart';
 import 'package:lapordermayu/modules/riwayat/views/riwayat_view.dart';
+import 'package:lapordermayu/modules/maps/views/maps_view.dart';
 import '../controllers/main_controller.dart';
 
 
@@ -14,7 +15,7 @@ class MainView extends GetView<MainController> {
 
   final List<Widget> pages = const [
     HomeView(),
-    Center(child: Text('Maps Page')),
+    MapsView(),
     RiwayatView(),
     ProfileView(),
   ];

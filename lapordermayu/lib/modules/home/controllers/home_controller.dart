@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -7,7 +8,9 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/api_service.dart';
 import '../../../utils/app_colors.dart';
+import '../../../utils/widgets/show_awesome_snackbar.dart';
 import '../../main/controllers/main_controller.dart';
+import '../../maps/controllers/maps_controller.dart';
 import '../models/home_model.dart';
 
 typedef QuickFeature = ({String label, IconData icon, Color color, Color bg});
@@ -64,26 +67,28 @@ class HomeController extends GetxController {
   final nearbyFacilityCount = 0.obs;
 
   bool _isFetching = false;
+  double? _lastLat;
+  double? _lastLon;
 
   // Menu Fitur Cepat
   final List<QuickFeature> quickFeatures = const [
     (
       label: 'Jalan Rusak',
       icon: Icons.report_problem_rounded,
-      color: AppColors.dangerRed,
+      color: Color(0xFFE11D48),
       bg: Color(0xFFFFF1F2),
     ),
     (
       label: 'Lapor Fasilitas',
       icon: Icons.lightbulb_outline_rounded,
-      color: AppColors.amber600,
-      bg: Color(0xFFFFF8E7),
+      color: Color(0xFFF59E0B),
+      bg: Color(0xFFFFFBEB),
     ),
     (
       label: 'Rute Aman',
       icon: Icons.alt_route_rounded,
-      color: AppColors.emerald600,
-      bg: AppColors.emerald50,
+      color: Color(0xFF059669),
+      bg: Color(0xFFECFDF5),
     ),
   ];
 
@@ -101,43 +106,97 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    refreshHomeData();
+
+    if (Get.isRegistered<MapsController>()) {
+      final mapsCtrl = Get.find<MapsController>();
+
+      // Gunakan lokasi yang sudah tersedia dari MapsController
+      final currentLocation = mapsCtrl.currentLocation.value;
+
+      if (currentLocation != null) {
+        _loadFromCoordinates(
+          currentLocation.latitude,
+          currentLocation.longitude,
+        );
+      } else {
+        refreshHomeData();
+      }
+
+      // Pantau perubahan lokasi GPS
+      ever(mapsCtrl.currentLocation, (loc) {
+        if (loc != null && _movedEnough(loc.latitude, loc.longitude)) {
+          _loadFromCoordinates(loc.latitude, loc.longitude);
+        }
+      });
+    } else {
+      refreshHomeData();
+    }
+  }
+
+  bool _movedEnough(double lat, double lon) {
+    if (_isFetching) return false;
+    final lastLat = _lastLat;
+    final lastLon = _lastLon;
+    if (lastLat == null || lastLon == null) return true;
+    return Geolocator.distanceBetween(lastLat, lastLon, lat, lon) > 300;
   }
 
   // LOAD DATA HOME
-  Future<void> refreshHomeData() async {
-    if (_isFetching) return;
 
+  Future<void> _loadFromCoordinates(double lat, double lon) async {
+    if (_isFetching) return;
     _isFetching = true;
+    _lastLat = lat;
+    _lastLon = lon;
     isLoading.value = true;
 
     try {
-      final position = await _determinePosition();
-
-      if (position == null) {
-        location.value = 'Lokasi tidak tersedia';
-        await _fetchBackendData();
-        return;
-      }
-
-      final lat = position.latitude;
-      final lon = position.longitude;
-
       await Future.wait([
         _fetchAddressFromCoordinates(lat, lon),
         _fetchRealtimeWeather(lat, lon),
       ]);
 
+      // Ambil statistik dan laporan dari Laravel
       await _fetchBackendData(lat: lat, lon: lon);
     } catch (e) {
-      debugPrint('[HOME] Gagal refresh Home: $e');
+      debugPrint('[HOME] Gagal memuat data Home: $e');
     } finally {
       _isFetching = false;
       isLoading.value = false;
     }
   }
 
+  Future<void> refreshHomeData() async {
+    try {
+      isLoading.value = true;
+
+      final position = await _determinePosition();
+
+      if (position == null) {
+        location.value = 'Izin lokasi belum aktif';
+
+        showAwesomeSnackbar(
+          title: 'Lokasi tidak tersedia',
+          message: 'Aktifkan GPS dan izin lokasi untuk memperbarui data.',
+          contentType: ContentType.warning,
+        );
+
+        // Tetap ambil laporan dan statistik meskipun GPS tidak aktif
+        await _fetchBackendData();
+        return;
+      }
+
+      _isFetching = false;
+      await _loadFromCoordinates(position.latitude, position.longitude);
+    } catch (e) {
+      debugPrint('[HOME] Gagal refresh Home: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   // REQUEST KE LARAVEL API
+
   Future<void> _fetchBackendData({double? lat, double? lon}) async {
     try {
       final response = await ApiService.dio.get(
@@ -189,7 +248,6 @@ class HomeController extends GetxController {
       debugPrint('[HOME] Total laporan: ${home.stats.total}');
       debugPrint('[HOME] Laporan terkini: ${home.recentReports.length}');
       debugPrint('[HOME] Kondisi sekitar: ${home.nearby.length}');
-
       await _fetchNotifications();
     } catch (e) {
       debugPrint('[HOME] Error mengambil data Laravel: $e');
@@ -203,14 +261,14 @@ class HomeController extends GetxController {
       case 'diperbaiki':
         return (
           label: 'Selesai',
-          color: AppColors.success,
-          bg: AppColors.emerald50,
+          color: const Color(0xFF059669),
+          bg: const Color(0xFFECFDF5),
         );
 
       case 'terverifikasi':
         return (
           label: 'Terverifikasi',
-          color: AppColors.infoBlue,
+          color: const Color(0xFF2563EB),
           bg: const Color(0xFFEFF6FF),
         );
 
@@ -218,22 +276,22 @@ class HomeController extends GetxController {
       case 'proses':
         return (
           label: 'Diproses',
-          color: AppColors.amber600,
-          bg: const Color(0xFFFFF8E7),
+          color: const Color(0xFFD97706),
+          bg: const Color(0xFFFFFBEB),
         );
 
       case 'ditolak':
         return (
           label: 'Ditolak',
-          color: AppColors.error,
+          color: const Color(0xFFDC2626),
           bg: const Color(0xFFFEF2F2),
         );
 
       default:
         return (
           label: 'Menunggu',
-          color: AppColors.textSecondary,
-          bg: AppColors.slate100,
+          color: const Color(0xFF64748B),
+          bg: const Color(0xFFF1F5F9),
         );
     }
   }
@@ -266,28 +324,25 @@ class HomeController extends GetxController {
       icon: isRoad
           ? Icons.report_problem_rounded
           : Icons.lightbulb_outline_rounded,
-      iconColor: isRoad ? AppColors.dangerRed : AppColors.amber600,
-      thumbBg: isRoad
-          ? const Color(0xFFFFF1F2)
-          : const Color(0xFFFFF8E7),
+      iconColor: isRoad ? const Color(0xFFE11D48) : const Color(0xFFF59E0B),
+      thumbBg: isRoad ? const Color(0xFFFFF1F2) : const Color(0xFFFFFBEB),
     );
   }
 
   ConditionItem _toConditionItem(HomeReport report) {
     final isRoad = report.isJalanRusak;
     final style = _statusStyle(report.status);
+
     final jarak = report.jarakKm ?? 0;
 
     return (
       badge: isRoad ? 'JALAN RUSAK' : 'FASILITAS',
-      badgeColor: isRoad ? AppColors.dangerRed : AppColors.amber600,
-      badgeBg: isRoad
-          ? const Color(0xFFFFF1F2)
-          : const Color(0xFFFFF8E7),
+      badgeColor: isRoad ? const Color(0xFFE11D48) : const Color(0xFFF59E0B),
+      badgeBg: isRoad ? const Color(0xFFFFF1F2) : const Color(0xFFFFFBEB),
       trailingIcon: Icons.near_me_rounded,
-      trailingIconColor: AppColors.textSecondary,
+      trailingIconColor: const Color(0xFF64748B),
       trailingText: '${jarak.toStringAsFixed(2)} km',
-      trailingTextColor: AppColors.textSecondary,
+      trailingTextColor: const Color(0xFF64748B),
       title: report.judul,
       description: report.alamat ?? 'Lokasi tidak diketahui',
       footer: style.label,
@@ -314,16 +369,11 @@ class HomeController extends GetxController {
     }
 
     return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-      ),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     );
   }
 
-  Future<void> _fetchAddressFromCoordinates(
-    double lat,
-    double lon,
-  ) async {
+  Future<void> _fetchAddressFromCoordinates(double lat, double lon) async {
     try {
       final uri = Uri.https('nominatim.openstreetmap.org', '/reverse', {
         'lat': lat.toString(),
@@ -358,11 +408,7 @@ class HomeController extends GetxController {
             addr['state'] ??
             '';
 
-        location.value = city.toString().isNotEmpty
-            ? '$road, $city'
-            : '$road';
-      } else {
-        location.value = '${lat.toStringAsFixed(4)}, ${lon.toStringAsFixed(4)}';
+        location.value = city.toString().isNotEmpty ? '$road, $city' : '$road';
       }
     } catch (_) {
       location.value = '${lat.toStringAsFixed(4)}, ${lon.toStringAsFixed(4)}';
@@ -387,10 +433,8 @@ class HomeController extends GetxController {
       final current = data['current'] as Map<String, dynamic>? ?? {};
 
       final temp = (current['temperature_2m'] as num?)?.round() ?? 0;
-      final hum =
-          (current['relative_humidity_2m'] as num?)?.round() ?? 0;
-      final windSpeed =
-          (current['wind_speed_10m'] as num?)?.round() ?? 0;
+      final hum = (current['relative_humidity_2m'] as num?)?.round() ?? 0;
+      final windSpeed = (current['wind_speed_10m'] as num?)?.round() ?? 0;
       final code = (current['weather_code'] as num?)?.toInt() ?? 0;
       final isDay = (current['is_day'] as num?)?.toInt() == 1;
 
@@ -407,10 +451,7 @@ class HomeController extends GetxController {
     }
   }
 
-  ({String label, String roadDesc}) _mapWeatherCode(
-    int code,
-    bool isDay,
-  ) {
+  ({String label, String roadDesc}) _mapWeatherCode(int code, bool isDay) {
     final modeText = isDay
         ? 'Mode Siang Aktif'
         : 'Mode Malam Aktif (PJU Dihitung)';
@@ -450,20 +491,21 @@ class HomeController extends GetxController {
   void onFeatureTap(String label) {
     if (label == 'Rute Aman') {
       openMap();
+      return;
     }
+
+    // TODO: navigasi ke halaman lapor (kamera) setelah hackathon
   }
 
   Future<void> _fetchNotifications() async {
     try {
       final res = await ApiService.dio.get('/notifications');
       final body = res.data;
-
       if (body is Map && body['data'] is List) {
         notifications.value = (body['data'] as List)
             .whereType<Map>()
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
-
         hasUnreadNotification.value = notifications.isNotEmpty;
       }
     } catch (e) {
