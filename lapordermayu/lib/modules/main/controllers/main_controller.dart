@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:lapordermayu/routes/app_routes.dart';
 
 class MainController extends GetxController {
   final currentIndex = 0.obs;
@@ -8,5 +9,6 @@ class MainController extends GetxController {
   }
 
   void openReport() {
+    Get.toNamed(AppRoutes.reportCamera);
   }
 }
