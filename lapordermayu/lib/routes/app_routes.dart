@@ -6,4 +6,6 @@ abstract class AppRoutes {
   static const login = '/login';
   static const register = '/register';
    static const main = '/main';
+  static const reportCamera = '/report-camera';
+  static const reportForm = '/report-form';
 }

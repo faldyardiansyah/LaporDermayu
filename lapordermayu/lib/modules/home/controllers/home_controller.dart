@@ -12,6 +12,8 @@ import '../../../utils/widgets/show_awesome_snackbar.dart';
 import '../../main/controllers/main_controller.dart';
 import '../../maps/controllers/maps_controller.dart';
 import '../models/home_model.dart';
+import 'package:lapordermayu/routes/app_routes.dart';
+import '../../report/models/report_category_model.dart';
 
 typedef QuickFeature = ({String label, IconData icon, Color color, Color bg});
 
@@ -488,13 +490,35 @@ class HomeController extends GetxController {
     }
   }
 
-  void onFeatureTap(String label) {
+    void onFeatureTap(String label) {
     if (label == 'Rute Aman') {
       openMap();
       return;
     }
 
-    // TODO: navigasi ke halaman lapor (kamera) setelah hackathon
+    if (label == 'Jalan Rusak') {
+      Get.toNamed(
+        AppRoutes.reportCamera,
+        arguments: {
+          'category': ReportCategoryModel.jalanRusak,
+          'reportType': 'jalan_rusak',
+          'title': 'Laporan Jalan Rusak',
+        },
+      );
+      return;
+    }
+
+    if (label == 'Lapor Fasilitas') {
+      Get.toNamed(
+        AppRoutes.reportCamera,
+        arguments: {
+          'category': ReportCategoryModel.fasilitasUmum,
+          'reportType': 'fasilitas',
+          'title': 'Laporan Fasilitas Umum',
+        },
+      );
+      return;
+    }
   }
 
   Future<void> _fetchNotifications() async {

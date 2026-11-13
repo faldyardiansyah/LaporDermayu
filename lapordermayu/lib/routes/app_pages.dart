@@ -13,6 +13,10 @@ import 'package:lapordermayu/modules/profile/controllers/profile_controller.dart
 import 'package:lapordermayu/modules/riwayat/controllers/riwayat_controller.dart';
 import 'package:lapordermayu/modules/home/controllers/home_controller.dart';
 import 'package:lapordermayu/modules/maps/controllers/maps_controller.dart';
+import 'package:lapordermayu/modules/report/controllers/report_camera_controller.dart';
+import 'package:lapordermayu/modules/report/views/report_camera_view.dart';
+import 'package:lapordermayu/modules/report/controllers/report_form_controller.dart';
+import 'package:lapordermayu/modules/report/views/report_form_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -56,6 +60,20 @@ class AppPages {
         Get.lazyPut<RiwayatController>(() => RiwayatController());
         Get.lazyPut<HomeController>(() => HomeController());
         Get.lazyPut<MapsController>(() => MapsController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.reportCamera,
+      page: () => ReportCameraView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ReportCameraController>(() => ReportCameraController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.reportForm,
+      page: () => ReportFormView(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<ReportFormController>(() => ReportFormController());
       }),
     ),
   ];
