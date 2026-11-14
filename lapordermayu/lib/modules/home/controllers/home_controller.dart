@@ -491,22 +491,22 @@ class HomeController extends GetxController {
 
   // NAVIGASI
   void openDetail(HomeReport r) {
-  ReportDetailView.open(
-    ReportDetailModel(
-      id: r.id,
-      judul: r.judul,
-      deskripsi: r.deskripsi,
-      kategori: r.isJalanRusak ? 'jalan_rusak' : 'fasilitas',
-      status: r.status,
-      foto: _resolveImageUrl(r.foto),
-      alamat: r.alamat,
-      tanggal: r.tanggal,
-      waktu: r.tanggal,
-      latitude: r.latitude,
-      longitude: r.longitude,
-    ),
-  );
-}
+    ReportDetailView.open(
+      ReportDetailModel(
+        id: r.id,
+        judul: r.judul,
+        deskripsi: r.deskripsi,
+        kategori: r.isJalanRusak ? 'jalan_rusak' : 'fasilitas',
+        status: r.status,
+        foto: _resolveImageUrl(r.foto),
+        alamat: r.alamat,
+        tanggal: r.tanggal,
+        waktu: r.tanggal,
+        latitude: r.latitude,
+        longitude: r.longitude,
+      ),
+    );
+  }
 
   void openMap() {
     if (Get.isRegistered<MainController>()) {

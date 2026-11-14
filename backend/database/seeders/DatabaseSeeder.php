@@ -44,6 +44,12 @@ class DatabaseSeeder extends Seeder
                     'role' => 'admin_instansi',
                     'instansi_id' => $instansi->id,
                 ],
+                [
+                    'name' => 'User testing',
+                    'email' => 'user@gmail.com',
+                    'role' => 'masyarakat',
+                    'instansi_id' => null,
+                ],
             ];
 
             foreach ($accounts as $account) {

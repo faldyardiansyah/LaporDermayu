@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:lapordermayu/routes/app_routes.dart';
 import 'package:lapordermayu/modules/report/models/report_category_model.dart';
+import 'package:flutter/foundation.dart';
 
 class ReportCameraController extends GetxController {
   final Rxn<CameraController> cameraController = Rxn<CameraController>();
@@ -60,6 +61,22 @@ class ReportCameraController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    final arguments = Get.arguments;
+
+    debugPrint('[CAMERA] Arguments: $arguments');
+
+    if (arguments is Map) {
+      final selectedCategory = arguments['category'];
+
+      if (selectedCategory is ReportCategoryModel) {
+        setCategory(selectedCategory);
+      }
+    }
+
+    debugPrint('[CAMERA] Category: ${category.value}');
+    debugPrint('[CAMERA] Is Facility: $isFacility');
+
     initializeCamera();
   }
 
