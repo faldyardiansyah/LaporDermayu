@@ -21,6 +21,7 @@ import '../../../utils/widgets/success_lottie_dialog.dart';
 import '../../home/controllers/home_controller.dart';
 import '../models/report_category_model.dart';
 import '../models/report_submit_model.dart';
+import '../../riwayat/controllers/riwayat_controller.dart';
 
 typedef FacilityAnalysis = DeepseekAnalysisResult;
 
@@ -484,10 +485,16 @@ class ReportFormController extends GetxController {
       // lottie sukses dulu, baru balik ke home
       await SuccessLottieDialog.show();
 
+      if (Get.isRegistered<RiwayatController>()) {
+        await Get.find<RiwayatController>().fetchReports();
+      }
+
+      // Kembali ke halaman utama.
       Get.until((route) => route.isFirst);
 
+      // Perbarui data Home.
       if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().refreshHomeData();
+        await Get.find<HomeController>().refreshHomeData();
       }
     } on DioException catch (e) {
       _hideLoading();

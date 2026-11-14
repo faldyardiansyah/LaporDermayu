@@ -112,7 +112,7 @@ class ReportDetailView extends StatelessWidget {
 
   Widget _buildHeader(double topInset) {
     return Container(
-      height: topInset + 150,
+      height: topInset + 165,
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: const BoxDecoration(
@@ -122,54 +122,67 @@ class ReportDetailView extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(38),
-          bottomRight: Radius.circular(38),
+          bottomLeft: Radius.circular(36),
+          bottomRight: Radius.circular(36),
         ),
       ),
       child: Stack(
         children: [
+          // Ornamen Mega Mendung kanan atas
           Positioned(
-            top: topInset - 34,
-            right: -135,
-            child: MegaMendung(
-              width: 345,
-              color: Colors.white.withValues(alpha: 0.24),
-            ),
-          ),
-          Positioned(
-            left: -160,
-            bottom: -15,
+            top: topInset - 42,
+            right: -105,
             child: MegaMendung(
               width: 310,
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.white.withValues(alpha: 0.17),
             ),
           ),
+
+          // Ornamen Mega Mendung kiri bawah
+          Positioned(
+            left: -145,
+            bottom: -75,
+            child: MegaMendung(
+              width: 290,
+              color: Colors.white.withValues(alpha: 0.12),
+            ),
+          ),
+
+          // Ornamen tambahan
+          Positioned(
+            right: 15,
+            bottom: -105,
+            child: MegaMendung(
+              width: 185,
+              color: Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
+
           Padding(
-            padding: EdgeInsets.fromLTRB(22, topInset + 18, 22, 0),
+            padding: EdgeInsets.fromLTRB(20, topInset + 18, 20, 0),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
+                Material(
+                  color: Colors.white.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(15),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: () => Get.back(),
+                    child: const SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 18,
                       ),
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
-                      size: 18,
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -178,11 +191,13 @@ class ReportDetailView extends StatelessWidget {
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
                         ),
                       ),
+                      const SizedBox(height: 5),
                       Text(
                         preview.id != null
-                            ? 'Laporan #${preview.id}'
+                            ? 'Informasi laporan #${preview.id}'
                             : 'Informasi lengkap laporan',
                         style: jakarta.copyWith(
                           color: Colors.white.withValues(alpha: 0.85),
@@ -191,6 +206,22 @@ class ReportDetailView extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                Container(
+                  width: 43,
+                  height: 43,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.assignment_rounded,
+                    color: Colors.white,
+                    size: 21,
                   ),
                 ),
               ],
@@ -204,82 +235,112 @@ class ReportDetailView extends StatelessWidget {
   Widget _buildPhoto(ReportDetailModel r) {
     final url = r.foto;
 
-    return GestureDetector(
-      onTap: url == null ? null : () => _openPhoto(url),
-      child: Container(
-        height: 220,
-        width: double.infinity,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: AppColors.slate200,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.slate900.withValues(alpha: 0.12),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: url == null
-            ? _photoPlaceholder()
-            : Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
+    return Container(
+      height: 225,
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: AppColors.slate200),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.slate900.withValues(alpha: 0.07),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: url == null
+          ? _photoPlaceholder()
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                GestureDetector(
+                  onTap: () => _openPhoto(url),
+                  child: Image.network(
                     url,
                     fit: BoxFit.cover,
                     loadingBuilder: (_, child, progress) {
                       if (progress == null) return child;
                       return const Center(
-                        child: SizedBox(
-                          width: 26,
-                          height: 26,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: AppColors.homeBlue,
-                          ),
+                        child: CircularProgressIndicator(
+                          color: AppColors.homeBlue,
+                          strokeWidth: 2.5,
                         ),
                       );
                     },
                     errorBuilder: (_, _, _) => _photoPlaceholder(),
                   ),
-                  Positioned(
-                    left: 12,
-                    bottom: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.slate900.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.zoom_out_map_rounded,
+                ),
+                Positioned(
+                  top: 14,
+                  left: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 11,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.photo_camera_rounded,
+                          color: Colors.white,
+                          size: 13,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Foto Bukti Laporan',
+                          style: jakarta.copyWith(
                             color: Colors.white,
-                            size: 14,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Ketuk untuk zoom',
-                            style: jakarta.copyWith(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-      ),
+                ),
+                Positioned(
+                  right: 14,
+                  bottom: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.58),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.zoom_in_rounded,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Perbesar foto',
+                          style: jakarta.copyWith(
+                            color: Colors.white,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 
@@ -944,13 +1005,13 @@ class ReportDetailView extends StatelessWidget {
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: AppColors.homeCardBorder),
+      borderRadius: BorderRadius.circular(23),
+      border: Border.all(color: AppColors.slate200.withValues(alpha: 0.75)),
       boxShadow: [
         BoxShadow(
-          color: AppColors.slate900.withValues(alpha: 0.05),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
+          color: AppColors.slate900.withValues(alpha: 0.035),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
         ),
       ],
     );

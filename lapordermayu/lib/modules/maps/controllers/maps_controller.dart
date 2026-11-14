@@ -843,10 +843,29 @@ class MapsController extends GetxController {
     return Colors.green;
   }
 
+  bool _isApprovedHazard(Map<String, dynamic> hazard) {
+    final status = (hazard['status'] ?? '').toString().toLowerCase().trim();
+
+    return {
+      'terverifikasi',
+      'diproses',
+      'diperbaiki',
+      'selesai',
+      'verified',
+      'approved',
+    }.contains(status);
+  }
+
   void setHazardReports(List<Map<String, dynamic>> reports) {
-    hazardReports.assignAll(reports);
+    final approvedReports = reports.where(_isApprovedHazard).toList();
+
+    hazardReports.assignAll(approvedReports);
+
     calculateRouteRisks();
-    if (isNavigating.value) _buildRouteHazards();
+
+    if (isNavigating.value) {
+      _buildRouteHazards();
+    }
   }
 
   Future<void> loadHazards() async {
