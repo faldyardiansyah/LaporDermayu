@@ -10,13 +10,17 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:get_storage/get_storage.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lapordermayu/utils/widgets/lapor_dermayu_loading.dart';
+import '../../../core/api_service.dart';
 import '../../../core/detection/deepseek/models/deepseek_analysis_result.dart';
 import '../../../core/detection/deepseek/services/deepseek_service.dart';
 import '../../../core/detection/yolo/services/detection_services.dart';
 import '../../../core/detection/yolo/models/detection_result.dart';
 import '../../../utils/widgets/show_awesome_snackbar.dart';
+import '../../../utils/widgets/success_lottie_dialog.dart';
+import '../../home/controllers/home_controller.dart';
 import '../models/report_category_model.dart';
-import 'package:lapordermayu/utils/widgets/lapor_dermayu_loading.dart';
+import '../models/report_submit_model.dart';
 
 typedef FacilityAnalysis = DeepseekAnalysisResult;
 
@@ -63,6 +67,10 @@ class ReportFormController extends GetxController {
   bool get isProcessing => category.value == ReportCategoryModel.jalanRusak
       ? isDetecting.value
       : isAnalyzingAi.value;
+
+  String get _kategoriApi => category.value == ReportCategoryModel.jalanRusak
+      ? 'jalan_rusak'
+      : 'fasilitas';
 
   double get pinOffsetMeter {
     final a = anchorPoint.value;
@@ -320,7 +328,8 @@ class ReportFormController extends GetxController {
           connectTimeout: const Duration(seconds: 8),
           receiveTimeout: const Duration(seconds: 8),
           headers: {
-            'User-Agent': 'LaporDermayu/1.0 (aplikasi pelaporan jalan Indramayu)',
+            'User-Agent':
+                'LaporDermayu/1.0 (aplikasi pelaporan jalan Indramayu)',
             'Accept-Language': 'id',
           },
         ),
@@ -415,15 +424,82 @@ class ReportFormController extends GetxController {
 
     try {
       isSubmitting.value = true;
+      _showLoading();
 
-      // TODO: kirim ke backend (compress foto + POST '/laporan') setelah hackathon
-      _snack(
-        'Segera hadir',
-        'Fitur pengiriman laporan belum tersedia.',
-        ContentType.warning,
+      final minimumLoading = Future.delayed(const Duration(milliseconds: 900));
+      final annotated = annotatedImageBytes.value;
+      final useAnnotated =
+          category.value == ReportCategoryModel.jalanRusak && annotated != null;
+
+      Uint8List bytes;
+      if (useAnnotated) {
+        try {
+          bytes = await FlutterImageCompress.compressWithList(
+            annotated,
+            minWidth: 1280,
+            minHeight: 1280,
+            quality: 85,
+            format: CompressFormat.jpeg,
+          );
+        } catch (_) {
+          bytes = annotated;
+        }
+      } else {
+        bytes = await _compressForUpload(file);
+      }
+
+      final form = FormData.fromMap({
+        'judul': judul,
+        'deskripsi': deskripsi,
+        'kategori': _kategoriApi,
+        'latitude': pin.latitude.toStringAsFixed(7),
+        'longitude': pin.longitude.toStringAsFixed(7),
+        if (alamatLokasi.value != null) 'alamat_lokasi': alamatLokasi.value,
+        'foto': MultipartFile.fromBytes(bytes, filename: 'laporan.jpg'),
+      });
+
+      final response = await ApiService.dio.post(
+        '/laporan',
+        data: form,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {'Accept': 'application/json'},
+          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 60),
+        ),
       );
+
+      debugPrint(
+        'SUBMIT OK status=${response.statusCode} body=${response.data}',
+      );
+
+      await minimumLoading;
+      _hideLoading();
+
+      final body = response.data;
+      if (body is Map && body['data'] is Map) {
+        ReportSubmitModel.fromJson(Map<String, dynamic>.from(body['data']));
+      }
+
+      // lottie sukses dulu, baru balik ke home
+      await SuccessLottieDialog.show();
+
+      Get.until((route) => route.isFirst);
+
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().refreshHomeData();
+      }
+    } on DioException catch (e) {
+      _hideLoading();
+      _handleDioError(e);
     } catch (err, st) {
       debugPrint('SUBMIT CRASH $err\n$st');
+      _hideLoading();
+      _snack(
+        'Gagal mengirim',
+        'Terjadi kesalahan di aplikasi. Silakan coba lagi.',
+        ContentType.failure,
+      );
     } finally {
       _hideLoading();
       isSubmitting.value = false;
