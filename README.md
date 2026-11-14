@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/faldyardiansyah/LaporDermayu/main/assets/banner.png" alt="Banner LaporDermayu" width="100%">
+  <img src="https://raw.githubusercontent.com/faldyardiansyah/LaporDermayu/main/assets/banner.png?v=2" alt="Banner LaporDermayu" width="100%">
 </p>
 
 <p align="center">
