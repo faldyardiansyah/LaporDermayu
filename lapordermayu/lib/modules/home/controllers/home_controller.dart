@@ -14,6 +14,8 @@ import '../../maps/controllers/maps_controller.dart';
 import '../models/home_model.dart';
 import 'package:lapordermayu/routes/app_routes.dart';
 import '../../report/models/report_category_model.dart';
+import '../../report/models/report_detail_model.dart';
+import '../../report/views/report_detail_view.dart';
 
 typedef QuickFeature = ({String label, IconData icon, Color color, Color bg});
 
@@ -28,6 +30,7 @@ typedef ReportItem = ({
   IconData icon,
   Color iconColor,
   Color thumbBg,
+  HomeReport raw,
 });
 
 typedef ConditionItem = ({
@@ -44,6 +47,7 @@ typedef ConditionItem = ({
   bool footerMono,
   String actionLabel,
   bool primaryAction,
+  HomeReport raw,
 });
 
 typedef ImpactStat = ({String value, String label, Color color});
@@ -328,6 +332,7 @@ class HomeController extends GetxController {
           : Icons.lightbulb_outline_rounded,
       iconColor: isRoad ? const Color(0xFFE11D48) : const Color(0xFFF59E0B),
       thumbBg: isRoad ? const Color(0xFFFFF1F2) : const Color(0xFFFFFBEB),
+      raw: report,
     );
   }
 
@@ -351,6 +356,7 @@ class HomeController extends GetxController {
       footerMono: false,
       actionLabel: 'Lihat Peta',
       primaryAction: true,
+      raw: report,
     );
   }
 
@@ -484,13 +490,26 @@ class HomeController extends GetxController {
   }
 
   // NAVIGASI
+  void openDetail(HomeReport r) {
+    ReportDetailView.open(
+      ReportDetailModel(
+        judul: r.judul,
+        kategori: r.isJalanRusak ? 'jalan_rusak' : 'fasilitas',
+        status: r.status,
+        foto: _resolveImageUrl(r.foto),
+        alamat: r.alamat,
+        waktu: r.tanggal,
+      ),
+    );
+  }
+
   void openMap() {
     if (Get.isRegistered<MainController>()) {
       Get.find<MainController>().changeTab(1);
     }
   }
 
-    void onFeatureTap(String label) {
+  void onFeatureTap(String label) {
     if (label == 'Rute Aman') {
       openMap();
       return;

@@ -6,7 +6,8 @@ import 'package:latlong2/latlong.dart';
 import 'dart:math' as math;
 import 'package:lapordermayu/utils/app_colors.dart';
 import 'package:lapordermayu/utils/mapbox_config.dart';
-
+import 'package:lapordermayu/modules/report/models/report_detail_model.dart';
+import 'package:lapordermayu/modules/report/views/report_detail_view.dart';
 import '../controllers/maps_controller.dart';
 
 class MapsView extends GetView<MapsController> {
@@ -149,21 +150,31 @@ class MapsView extends GetView<MapsController> {
           icon = Icons.warning_amber_rounded;
       }
 
+      final data = Map<String, dynamic>.from(hazard)
+        ..putIfAbsent(
+          'kategori',
+          () => kind == 'damage' ? 'jalan_rusak' : 'fasilitas',
+        );
+
       markers.add(
         Marker(
           point: LatLng(latitude.toDouble(), longitude.toDouble()),
           width: 38,
           height: 38,
-          child: Center(
-            child: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => ReportDetailView.open(ReportDetailModel.fromMap(data)),
+            child: Center(
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: Icon(icon, color: Colors.white, size: 16),
               ),
-              child: Icon(icon, color: Colors.white, size: 16),
             ),
           ),
         ),

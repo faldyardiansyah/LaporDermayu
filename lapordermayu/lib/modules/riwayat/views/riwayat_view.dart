@@ -7,7 +7,8 @@ import 'package:lottie/lottie.dart';
 import 'package:lapordermayu/utils/app_colors.dart';
 import 'package:lapordermayu/utils/widgets/mega_mendung.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-
+import 'package:lapordermayu/modules/report/models/report_detail_model.dart';
+import 'package:lapordermayu/modules/report/views/report_detail_view.dart';
 import '../controllers/riwayat_controller.dart';
 
 class RiwayatView extends GetView<RiwayatController> {
@@ -381,7 +382,7 @@ class RiwayatView extends GetView<RiwayatController> {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: null, // TODO: buka detail laporan setelah hackathon (14)
+        onTap: () => _openDetail(report),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: _cardDecoration(radius: 20),
@@ -533,6 +534,23 @@ class RiwayatView extends GetView<RiwayatController> {
         ],
       ),
     ).animate().fadeIn(duration: 400.ms);
+  }
+
+  void _openDetail(ReportHistory report) {
+    ReportDetailView.open(
+      ReportDetailModel(
+        id: int.tryParse(report.id),
+        judul: report.damageType,
+        deskripsi: report.description.isEmpty ? null : report.description,
+        kategori: report.category == ReportCategory.jalan
+            ? 'jalan_rusak'
+            : 'fasilitas',
+        status: report.status.name,
+        foto: report.foto,
+        alamat: report.location,
+        waktu: controller.formatDate(report.createdAt),
+      ),
+    );
   }
 
   Widget _thumb(ReportHistory report) {

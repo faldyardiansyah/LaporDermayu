@@ -881,92 +881,96 @@ class HomeView extends GetView<HomeController> {
   Widget _buildReportCard(ReportItem report) {
     final fallbackIcon = Icon(report.icon, color: report.iconColor, size: 26);
 
-    return Container(
-      width: 250,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.homeCardTint,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: report.thumbBg,
-              borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => controller.openDetail(report.raw),
+      child: Container(
+        width: 250,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.homeCardTint,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: report.thumbBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: report.image != null
+                  ? Image.network(
+                      report.image!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => fallbackIcon,
+                    )
+                  : fallbackIcon,
             ),
-            child: report.image != null
-                ? Image.network(
-                    report.image!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => fallbackIcon,
-                  )
-                : fallbackIcon,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  report.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _jakarta(
-                    12,
-                    FontWeight.w700,
-                    AppColors.slate900,
-                    height: 1.33,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  report.subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _jakarta(
-                    10,
-                    FontWeight.w400,
-                    AppColors.slate500,
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                _pill(
-                  color: report.statusBg,
-                  border: report.statusBorder,
-                  child: Text(
-                    report.status,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    report.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: _jakarta(
-                      9,
-                      FontWeight.w600,
-                      report.statusColor,
+                      12,
+                      FontWeight.w700,
+                      AppColors.slate900,
+                      height: 1.33,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    report.subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: _jakarta(
+                      10,
+                      FontWeight.w400,
+                      AppColors.slate500,
                       height: 1.5,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  _pill(
+                    color: report.statusBg,
+                    border: report.statusBorder,
+                    child: Text(
+                      report.status,
+                      style: _jakarta(
+                        9,
+                        FontWeight.w600,
+                        report.statusColor,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: const BoxDecoration(
-              color: AppColors.slate100,
-              shape: BoxShape.circle,
+            const SizedBox(width: 8),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: AppColors.slate100,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.sync_rounded,
+                size: 18,
+                color: AppColors.homeBlue,
+              ),
             ),
-            child: const Icon(
-              Icons.sync_rounded,
-              size: 18,
-              color: AppColors.homeBlue,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1008,96 +1012,108 @@ class HomeView extends GetView<HomeController> {
   }
 
   Widget _buildConditionCard(ConditionItem item) {
-    return Container(
-      width: 270,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.homeCardTint,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.homeCardBorder),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0C000000),
-            blurRadius: 16,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _pill(
-                color: item.badgeBg,
-                radius: 6,
-                child: Text(
-                  item.badge,
-                  style: _jakarta(
-                    9,
-                    FontWeight.w700,
-                    item.badgeColor,
-                    height: 1.5,
-                    spacing: 0.45,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => controller.openDetail(item.raw),
+      child: Container(
+        width: 270,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.homeCardTint,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.homeCardBorder),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0C000000),
+              blurRadius: 16,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _pill(
+                  color: item.badgeBg,
+                  radius: 6,
+                  child: Text(
+                    item.badge,
+                    style: _jakarta(
+                      9,
+                      FontWeight.w700,
+                      item.badgeColor,
+                      height: 1.5,
+                      spacing: 0.45,
+                    ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              if (item.trailingIcon != null)
-                Icon(item.trailingIcon, size: 14, color: item.trailingIconColor)
-              else
-                _circle(6, item.trailingIconColor),
-              const SizedBox(width: 4),
-              Text(
-                item.trailingText,
-                style: _jakarta(10.5, FontWeight.w600, item.trailingTextColor),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            item.title,
-            style: _jakarta(
-              14,
-              FontWeight.w700,
-              AppColors.slate900,
-              height: 1.43,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            item.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _jakarta(
-              11,
-              FontWeight.w400,
-              AppColors.slate600,
-              height: 1.38,
-            ),
-          ),
-          const Spacer(),
-          Divider(height: 1, color: Colors.white.withValues(alpha: 0.7)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  item.footer,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: item.footerMono
-                      ? _mono(10, AppColors.slate500)
-                      : _jakarta(10, FontWeight.w400, AppColors.slate500),
+                const Spacer(),
+                if (item.trailingIcon != null)
+                  Icon(
+                    item.trailingIcon,
+                    size: 14,
+                    color: item.trailingIconColor,
+                  )
+                else
+                  _circle(6, item.trailingIconColor),
+                const SizedBox(width: 4),
+                Text(
+                  item.trailingText,
+                  style: _jakarta(
+                    10.5,
+                    FontWeight.w600,
+                    item.trailingTextColor,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              item.title,
+              style: _jakarta(
+                14,
+                FontWeight.w700,
+                AppColors.slate900,
+                height: 1.43,
               ),
-              GestureDetector(
-                onTap: controller.openMap,
-                child: _buildConditionAction(item),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              item.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: _jakarta(
+                11,
+                FontWeight.w400,
+                AppColors.slate600,
+                height: 1.38,
               ),
-            ],
-          ),
-        ],
+            ),
+            const Spacer(),
+            Divider(height: 1, color: Colors.white.withValues(alpha: 0.7)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.footer,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: item.footerMono
+                        ? _mono(10, AppColors.slate500)
+                        : _jakarta(10, FontWeight.w400, AppColors.slate500),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: controller.openMap,
+                  child: _buildConditionAction(item),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
