@@ -450,7 +450,7 @@ LaporDermayu/
 |---|---|
 | Git | - |
 | PHP & Composer | Versi sesuai `backend/composer.json` (Laravel 13) |
-| MySQL | `[ISI: versi]` |
+| MySQL | `10.4.32-MariaDB` |
 | Flutter SDK | Stable terbaru (Dart `^3.9.0`) |
 | Android Studio / emulator / perangkat Android | Untuk menjalankan aplikasi |
 | Akun DeepSeek (API key) | https://platform.deepseek.com |
@@ -591,7 +591,7 @@ Dibuat otomatis oleh `DatabaseSeeder` (`php artisan db:seed`):
 | Kelas | 7: `alligator cracking`, `edge cracking`, `longitudinal cracking`, `patching`, `pothole`, `rutting`, `transverse cracking` |
 | Data validasi | 783 gambar, 4.264 objek |
 | Format di aplikasi | TFLite, dijalankan di perangkat dengan `tflite_flutter` |
-| Dataset | `[ISI: nama, sumber, dan lisensi dataset]` |
+| Dataset | `Roboflow` |
 
 **Metrik pada data validasi**
 
@@ -682,9 +682,8 @@ Dibuat otomatis oleh `DatabaseSeeder` (`php artisan db:seed`):
 | Library Dart | `flutter_dotenv`, `http`, `image` | Lihat pub.dev | Konfigurasi, jaringan, pengolahan foto |
 | Library Dart | `tflite_flutter`, `camera`, `flutter_image_compress`, `photo_view`, `get_storage` | Lihat pub.dev | Inferensi TFLite, kamera, kompresi foto, zoom foto, penyimpanan lokal |
 | Library Dart | `lottie`, `flutter_animate`, `google_fonts`, `awesome_snackbar_content`, `skeletonizer`, `cupertino_icons` | Lihat pub.dev | Animasi, font, notifikasi, tampilan memuat, ikon |
-| Dataset | `[ISI: nama dataset]` | `[ISI: sumber dan lisensi]` | Melatih dan menguji YOLOv11s (7 kelas kerusakan jalan) |
-| Library PHP (Laravel) | `[ISI: dari composer.json]` | `[ISI]` | `[ISI]` |
-| Aset visual | Logo, maskot, banner LaporDermayu | `[ISI: karya tim / sumber]` | Identitas aplikasi |
+| Dataset | `road-damage-det` | `Roboflow` | Melatih dan menguji YOLOv11s (7 kelas kerusakan jalan) |
+| Aset visual | Logo, maskot, banner LaporDermayu | `karya tim(Rakha Rasya Setiawan)` | Identitas aplikasi |
 
 ---
 
