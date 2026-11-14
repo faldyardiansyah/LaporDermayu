@@ -366,7 +366,7 @@ class LoginView extends GetView<LoginController> {
               children: [
                 const SizedBox(height: 10),
                 Text(
-                      'lapordermayu.',
+                      'LaporDermayu.',
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 25,
                         fontWeight: FontWeight.w800,

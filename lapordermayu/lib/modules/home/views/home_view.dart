@@ -956,17 +956,21 @@ class HomeView extends GetView<HomeController> {
               ),
             ),
             const SizedBox(width: 8),
-            Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
-                color: AppColors.slate100,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.sync_rounded,
-                size: 18,
-                color: AppColors.homeBlue,
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => controller.refreshHomeData(),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: AppColors.slate100,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.refresh_rounded,
+                  size: 18,
+                  color: AppColors.homeBlue,
+                ),
               ),
             ),
           ],

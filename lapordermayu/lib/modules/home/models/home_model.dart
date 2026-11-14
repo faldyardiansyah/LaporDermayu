@@ -21,25 +21,37 @@ class HomeStats {
   }
 }
 
+double? _parseDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString());
+}
+
 class HomeReport {
   final int id;
   final String judul;
+  final String? deskripsi;
   final String? alamat;
   final String kategori;
   final String status;
   final String? foto;
   final String? tanggal;
   final double? jarakKm;
+  final double? latitude;
+  final double? longitude;
 
   const HomeReport({
     required this.id,
     required this.judul,
     required this.kategori,
     required this.status,
+    this.deskripsi,
     this.alamat,
     this.foto,
     this.tanggal,
     this.jarakKm,
+    this.latitude,
+    this.longitude,
   });
 
   bool get isJalanRusak => kategori == 'jalan_rusak';
@@ -48,12 +60,16 @@ class HomeReport {
     return HomeReport(
       id: (json['id'] as num?)?.toInt() ?? 0,
       judul: json['judul']?.toString() ?? '',
-      alamat: json['alamat']?.toString(),
+      deskripsi:
+          json['deskripsi']?.toString() ?? json['description']?.toString(),
+      alamat: json['alamat']?.toString() ?? json['alamat_lokasi']?.toString(),
       kategori: json['kategori']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       foto: json['foto']?.toString(),
       tanggal: json['tanggal']?.toString(),
-      jarakKm: (json['jarak_km'] as num?)?.toDouble(),
+      jarakKm: _parseDouble(json['jarak_km']),
+      latitude: _parseDouble(json['latitude'] ?? json['lat']),
+      longitude: _parseDouble(json['longitude'] ?? json['lng'] ?? json['lon']),
     );
   }
 }

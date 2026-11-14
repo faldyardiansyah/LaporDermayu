@@ -17,11 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->appendToGroup('web', EnsureAccountIsActive::class);
+    $middleware->appendToGroup('web', EnsureAccountIsActive::class);
 
-        $middleware->alias([
-            'admin.instansi' => AdminInstansiMiddleware::class,
-            'super.admin' => SuperAdminMiddleware::class,
+    $middleware->alias([
+        'account.active' => EnsureAccountIsActive::class,
+        'admin.instansi' => AdminInstansiMiddleware::class,
+        'super.admin' => SuperAdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
